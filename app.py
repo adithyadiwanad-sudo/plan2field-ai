@@ -6,8 +6,9 @@ from datetime import datetime
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import whisper
 
-# Automatically initialize database if missing (Crucial for Streamlit Cloud)
+# Auto-initialize database on cloud start if missing
 import database_setup
 
 if not os.path.exists("college_department.db"):
@@ -30,10 +31,20 @@ st.markdown(
         border: 1px solid #313244;
         text-align: center;
     }
+    .badge-present { background-color: #2e7d32; color: white; padding: 4px 8px; border-radius: 4px; }
+    .badge-absent { background-color: #c62828; color: white; padding: 4px 8px; border-radius: 4px; }
     </style>
 """,
     unsafe_allow_html=True,
 )
+
+
+@st.cache_resource
+def load_whisper_model():
+  return whisper.load_model("base")
+
+
+model = load_whisper_model()
 
 
 def get_db_connection():
@@ -58,7 +69,7 @@ total_events = conn.execute(
 conn.close()
 
 col1.markdown(
-    f"<div class='metric-card'><h4>Total Students</h4>2>{total_students}</h2></div>",
+    f"<div class='metric-card'><h4>Total Students</h4><h2>{total_students}</h2></div>",
     unsafe_allow_html=True,
 )
 col2.markdown(
@@ -86,42 +97,70 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 with tab1:
   st.subheader("Voice Processing Engine")
-  transcription_input = st.text_area(
-      "Spoken Command / Transcription Input",
-      placeholder="e.g., Roll 101 present, Roll 102 absent",
+  audio_file = st.file_uploader(
+      "Upload Voice Command Audio", type=["wav", "mp3", "m4a"]
   )
 
-  if st.button("Process Command"):
-    pattern = (
-        r"(?:roll\s*no\.?|roll\s*)?(\d{3})\s*(?:is\s*)?(present|absent)"
-    )
-    matches = re.findall(pattern, transcription_input, re.IGNORECASE)
+  if audio_file is not None:
+    with open("temp_audio.wav", "wb") as f:
+      f.write(audio_file.getbuffer())
 
-    if matches:
-      df_matches = pd.DataFrame([
-          {
-              "Roll No": r,
-              "Status": s.capitalize(),
-              "Confidence": 0.95,
-              "Date": datetime.now().strftime("%Y-%m-%d"),
-          }
-          for r, s in matches
-      ])
-      st.write("### Review Extracted Records")
-      edited_df = st.data_editor(df_matches, num_rows="dynamic")
+    st.audio("temp_audio.wav")
 
-      if st.button("Save Records to Database"):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        for idx, row in edited_df.iterrows():
+    if st.button("Transcribe & Process"):
+      with st.spinner("Transcribing with Whisper AI..."):
+        result = model.transcribe("temp_audio.wav")
+        transcription = result["text"]
+
+      st.success("Transcription Complete!")
+      st.write(f'**Transcribed Text:** *"{transcription}"*')
+
+      # Pattern Parser
+      pattern = (
+          r"(?:roll\s*no\.?|roll\s*)?(\d{3})\s*(?:is\s*)?(present|absent)"
+      )
+      matches = re.findall(pattern, transcription, re.IGNORECASE)
+
+      if matches:
+        df_matches = pd.DataFrame([
+            {
+                "Roll No": r,
+                "Status": s.capitalize(),
+                "Confidence": 0.95,
+                "Date": datetime.now().strftime("%Y-%m-%d"),
+            }
+            for r, s in matches
+        ])
+        st.write("### Review Extracted Records")
+        edited_df = st.data_editor(df_matches, num_rows="dynamic")
+
+        if st.button("Save Records to Database"):
+          conn = get_db_connection()
+          cursor = conn.cursor()
+          for idx, row in edited_df.iterrows():
+            cursor.execute(
+                "INSERT INTO attendance_log (roll_no, status, date, confidence)"
+                " VALUES (?, ?, ?, ?)",
+                (
+                    row["Roll No"],
+                    row["Status"],
+                    row["Date"],
+                    row["Confidence"],
+                ),
+            )
           cursor.execute(
-              "INSERT INTO attendance_log (roll_no, status, date, confidence)"
-              " VALUES (?, ?, ?, ?)",
-              (row["Roll No"], row["Status"], row["Date"], row["Confidence"]),
+              "INSERT INTO audit_trail (timestamp, raw_transcription,"
+              " action_type, details) VALUES (?, ?, ?, ?)",
+              (
+                  datetime.now().isoformat(),
+                  transcription,
+                  "Attendance Insert",
+                  f"Inserted {len(edited_df)} records",
+              ),
           )
-        conn.commit()
-        conn.close()
-        st.success("Successfully logged into database!")
+          conn.commit()
+          conn.close()
+          st.success("Successfully logged into database!")
 
 with tab2:
   st.subheader("Attendance Distribution")
@@ -145,6 +184,7 @@ with tab3:
   conn = get_db_connection()
   df_cal = pd.read_sql_query("SELECT * FROM department_calendar", conn)
   conn.close()
+
   st.dataframe(df_cal, use_container_width=True)
 
 with tab4:
@@ -154,4 +194,5 @@ with tab4:
       "SELECT * FROM audit_trail ORDER BY action_id DESC", conn
   )
   conn.close()
+
   st.dataframe(df_audit, use_container_width=True)

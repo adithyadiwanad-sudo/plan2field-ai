@@ -10,4 +10,4 @@ openai-whisper==20250625
 # Optional cloud fallback, disabled by default in the UI.
 openai>=2.0,<3
 # SQLite, pathlib, difflib and other stdlib modules need no pip package.
-# Native st.audio_input provides browser recording; no st_audiorec dependency.
+# Native st.audio_input provides browser recording; no st_audiorec dependency
