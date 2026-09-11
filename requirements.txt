@@ -1,0 +1,13 @@
+# Python 3.11 recommended. Install FFmpeg separately and add it to PATH.
+# Run: python -m pip install -r requirements.txt
+# Start: python -m streamlit run app.py --theme.base=dark
+streamlit>=1.50,<2
+pandas>=2.2,<3
+plotly>=6.0,<7
+pydantic>=2.10,<3
+numpy>=1.26,<3
+openai-whisper==20250625
+# Optional cloud fallback, disabled by default in the UI.
+openai>=2.0,<3
+# SQLite, pathlib, difflib and other stdlib modules need no pip package.
+# Native st.audio_input provides browser recording; no st_audiorec dependency.
