@@ -1,5 +1,6 @@
 """Plan2Field AI: Voice-Driven Department & Attendance Manager.
 
+
 SETUP:
     python -m pip install -r requirements.txt
     python database_setup.py
