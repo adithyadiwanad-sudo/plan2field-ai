@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Check, MessageSquare, X, ClipboardCheck } from "lucide-react";
 import { proposals, proposalAction } from "../api/proposals";
-import { api } from "../api/client";
+import { api, apiUrl } from "../api/client";
 import CandidateComparison from "./CandidateComparison";
 import ProposalDiff from "./ProposalDiff";
 import ErrorState from "./ErrorState";
@@ -68,11 +68,19 @@ export default function ReviewerQueue() {
                   )}
                 </span>
                 <b>
-                  {row.proposed_changes.event_type} · {row.proposed_changes.event_date || row.reporting_date}
+                  {row.proposed_changes.event_type} ·{" "}
+                  {row.proposed_changes.event_date || row.reporting_date}
                 </b>
-                <p>{row.source_evidence?.text || row.original_text || row.transcript}</p>
+                <p>
+                  {row.source_evidence?.text ||
+                    row.original_text ||
+                    row.transcript}
+                </p>
                 <small>
-                  {row.discipline || row.proposed_changes.discipline || "Unknown discipline"} · Report {row.report_id.slice(0, 8)} · {row.source_type}
+                  {row.discipline ||
+                    row.proposed_changes.discipline ||
+                    "Unknown discipline"}{" "}
+                  · Report {row.report_id.slice(0, 8)} · {row.source_type}
                 </small>
               </button>
             ))}
@@ -202,7 +210,8 @@ function ReviewDetail({ p, projectId, onChange }) {
       {p.source_type === "VOICE" && (
         <audio
           controls
-          src={`/api/projects/${projectId}/reports/${p.report_id}/audio`}
+          crossOrigin="use-credentials"
+          src={apiUrl(`/projects/${projectId}/reports/${p.report_id}/audio`)}
         />
       )}
       <p className="muted">

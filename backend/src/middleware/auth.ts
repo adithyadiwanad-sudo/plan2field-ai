@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import type { RequestHandler } from "express";
 import { pool } from "../db/pool.js";
 import { ApiError } from "./errors.js";
-import { config } from "../config.js";
+import { isAllowedOrigin } from "../config.js";
 export const hash = (v: string | Buffer) =>
   createHash("sha256").update(v).digest("hex");
 export const auth: RequestHandler = async (req, res, next) => {
@@ -23,7 +23,7 @@ export const auth: RequestHandler = async (req, res, next) => {
   if (
     !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
     (req.get("X-CSRF-Token") !== rows[0].csrf_token ||
-      req.get("Origin") !== config.origin)
+      !isAllowedOrigin(req.get("Origin")))
   )
     throw new ApiError(
       403,

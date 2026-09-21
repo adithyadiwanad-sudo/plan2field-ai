@@ -9,9 +9,6 @@ try {
  const page=await browser.newPage({viewport:{width:1440,height:1000}});
  page.setDefaultTimeout(60000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(origin);
- await page.getByLabel('Email address').fill(process.env.DEMO_EMAIL);
- await page.getByLabel('Password',{exact:true}).fill(process.env.DEMO_PASSWORD);
- await page.getByRole('button',{name:'Sign in to workspace'}).click();
  const row=page.getByRole('row').filter({hasText:'ACT-24-SPOOL-01'});await row.waitFor();
  assert.equal(await row.count(),1);
  await mkdir('docs/screenshots',{recursive:true});

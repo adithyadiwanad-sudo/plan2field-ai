@@ -5,14 +5,14 @@ import { z } from "zod";
 import { pool } from "../db/pool.js";
 import { auth, hash } from "../middleware/auth.js";
 import { ApiError } from "../middleware/errors.js";
-import { config } from "../config.js";
-import {throttled} from '../middleware/requestId.js';
+import { config, isAllowedOrigin } from "../config.js";
+import { throttled } from "../middleware/requestId.js";
 export const authRouter = Router();
 authRouter.post(
   "/login",
-  rateLimit({ windowMs: 15 * 60 * 1000, limit: 15, handler:throttled }),
+  rateLimit({ windowMs: 15 * 60 * 1000, limit: 15, handler: throttled }),
   async (req, res) => {
-    if (req.get("Origin") !== config.origin)
+    if (!isAllowedOrigin(req.get("Origin")))
       throw new ApiError(403, "ORIGIN_REJECTED", "Invalid request origin.");
     const d = z
       .object({
@@ -44,7 +44,7 @@ authRouter.post(
     res
       .cookie("session", token, {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: config.secure ? "none" : "strict",
         secure: config.secure,
         maxAge: 43200000,
         path: "/",

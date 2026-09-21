@@ -8,7 +8,7 @@ import {
   Activity,
   CalendarDays,
 } from "lucide-react";
-import { api } from "../api/client";
+import { api, apiUrl } from "../api/client";
 import VarianceDashboard from "../components/VarianceDashboard";
 import ErrorState from "../components/ErrorState";
 import ProjectAudit from "../components/ProjectAudit";
@@ -102,12 +102,12 @@ export default function ProjectDashboard() {
                 External scheduling system not connected. Download field-level
                 update proposals for review.
               </p>
-              <a href={`/api/projects/${projectId}/exports?format=csv`}>
+              <a href={apiUrl(`/projects/${projectId}/exports?format=csv`)}>
                 Enterprise Export · CSV <ArrowUpRight size={16} />
               </a>
               <a
                 className="secondary"
-                href={`/api/projects/${projectId}/exports?format=json`}
+                href={apiUrl(`/projects/${projectId}/exports?format=json`)}
               >
                 Enterprise Export · JSON
               </a>

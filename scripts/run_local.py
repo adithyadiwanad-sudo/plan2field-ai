@@ -13,6 +13,7 @@ elif service=='worker':
     env['DATABASE_URL']=env['WORKER_DATABASE_URL'];env['HF_HUB_OFFLINE']='1'
     command=[sys.executable,str(root/'ml_worker/worker.py')];cwd=root
 elif service=='frontend':
+    env.setdefault('VITE_API_BASE_URL','/api')
     command=['node',str(root/'frontend/node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port',env.get('FRONTEND_PORT','5173'),'--strictPort'];cwd=root/'frontend'
 else:raise SystemExit('Usage: python scripts/run_local.py api|worker|frontend')
 for name in ['POSTGRES_PASSWORD','API_DB_PASSWORD','WORKER_DB_PASSWORD','API_DATABASE_URL','WORKER_DATABASE_URL','DEMO_PASSWORD']:

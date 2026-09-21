@@ -1,4 +1,5 @@
 import express from "express";
+import { cors } from "./middleware/cors.js";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
@@ -22,6 +23,7 @@ import { exportsForProject } from "./services/exportService.js";
 export const app = express();
 app.use(
   requestId,
+  cors,
   helmet(),
   cookieParser(),
   express.json({ limit: "100kb" }),

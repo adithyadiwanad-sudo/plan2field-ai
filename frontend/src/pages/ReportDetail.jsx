@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../api/client";
+import { api, apiUrl } from "../api/client";
 import ErrorState from "../components/ErrorState";
 export default function ReportDetail() {
   const { projectId, reportId } = useParams();
@@ -25,7 +25,8 @@ export default function ReportDetail() {
         {r.source_type === "VOICE" && (
           <audio
             controls
-            src={`/api/projects/${projectId}/reports/${reportId}/audio`}
+            crossOrigin="use-credentials"
+            src={apiUrl(`/projects/${projectId}/reports/${reportId}/audio`)}
           />
         )}
         <p>

@@ -6,7 +6,6 @@ const browser=await chromium.launch({channel:'msedge',headless:true});
 const context=await browser.newContext({viewport:{width:1440,height:1100}});
 const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
 await mkdir('docs/screenshots',{recursive:true});
-await page.goto('http://127.0.0.1:4173');await page.getByRole('heading',{name:'Welcome back.'}).waitFor();await page.screenshot({path:'docs/screenshots/login-desktop.png',fullPage:true});
 const id='11111111-1111-4111-8111-111111111111';const activity={id:'22222222-2222-4222-8222-222222222222',external_activity_id:'ACT-24-SPOOL-01',description:'Erect Pipe Line 24-XX',wbs_path:'OIL-DEMO.NORTH.PIPING.ERECTION',discipline:'PIPING',area:'NORTH',line_number:'24',activity_type:'ERECTION',planned_total_quantity:'10',quantity_unit:'spool',measurement_method:'EQUAL_COMPONENTS',actual_start:'2026-09-12',actual_finish:null,baseline_start:'2026-09-10',baseline_finish:'2026-09-20',accepted_quantity:'3',physical_percent_complete:'30',row_version:1,start_variance_days:2,finish_variance_days:null};
 const project={id,code:'OIL-DEMO-01',name:'Oil & Gas Piping Execution Demo',reporting_date:'2026-09-15',timezone:'Asia/Kolkata',role:'ADMIN'};
 let reviewProposal=null;

@@ -24,6 +24,8 @@ The configured Neon PostgreSQL database has been initialized with pgvector, prot
 
 ## Cloud database development
 
+The frontend now restores an existing session or automatically logs into the public demo account. See [Render/Vercel authentication setup](docs/render-vercel-auth.md) for API base URLs, deployment settings and demo credential overrides.
+
 The private root `.env` contains the owner `DATABASE_URL` and restricted `API_DATABASE_URL` / `WORKER_DATABASE_URL`. Do not overwrite it with `.env.example`. The database is initialized and the synthetic schedule/reports are seeded.
 
 Run each service from the repository root in a separate terminal:
