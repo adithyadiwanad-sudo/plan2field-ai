@@ -15,10 +15,10 @@ def parse(data,mapping):
                 if len(records)>=5000:raise ValueError('Report row limit exceeded')
                 value=row[col]
                 if isinstance(value,str) and value.startswith('='):raise ValueError('Formula evidence is not accepted')
-                if value:records.append({'text':str(value),'sheet':sheet.title,'row':index})
+                if value:records.append({'text':str(value),'sheet':sheet.title,'row':index,'discipline':str(row[headers.index(mapping.get('discipline','discipline'))] or '').upper() if mapping.get('discipline','discipline') in headers else None})
     else:
         for index,row in enumerate(csv.DictReader(io.StringIO(data.decode('utf-8-sig'))),2):
             if index>5001:raise ValueError('Report row limit exceeded')
             if mapping['text'] not in row:raise ValueError('Mapped text column not found')
-            records.append({'text':row[mapping['text']],'sheet':'CSV','row':index})
+            records.append({'text':row[mapping['text']],'sheet':'CSV','row':index,'discipline':(row.get(mapping.get('discipline','discipline')) or '').upper()})
     return records

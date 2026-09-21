@@ -1664,7 +1664,7 @@
     },
     "/api/projects/{projectId}/exports": {
       "get": {
-        "summary": "Read exports",
+        "summary": "Enterprise Export: approved actual event snapshots as integration JSON or flat CSV",
         "operationId": "get__projects_projectId_exports",
         "responses": {
           "200": {
@@ -2123,6 +2123,13 @@
             ],
             "default": null,
             "title": "Correction Of Event Id"
+          },
+          "physical_percent": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Observed physical percent; only quantity-measured scope can normalize it to a cumulative quantity."
           }
         },
         "required": [
@@ -2223,7 +2230,19 @@
           },
           "mapping": {
             "type": "string",
-            "description": "JSON object mapping text to a spreadsheet column header"
+            "description": "JSON mapping for text and optional discipline spreadsheet column headers"
+          },
+          "discipline": {
+            "type": "string",
+            "enum": [
+              "CIVIL",
+              "PIPING",
+              "ELECTRICAL",
+              "MECHANICAL",
+              "INSTRUMENTATION",
+              "HSSE"
+            ],
+            "description": "Optional hint; explicit per-event discipline takes priority."
           }
         }
       }

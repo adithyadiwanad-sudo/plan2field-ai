@@ -9,7 +9,7 @@ export async function audit(
   after: any,
 ) {
   await c.query(
-    "INSERT INTO audit_events(project_id,actor_id,action,entity_type,entity_id,request_id,before_json,after_json) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
+    "INSERT INTO audit_events(project_id,actor_id,action,entity_type,entity_id,request_id,before_json,after_json,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,jsonb_build_object('actor_role',(SELECT role FROM project_memberships WHERE project_id=$1 AND user_id=$2)))",
     [
       project,
       actor,

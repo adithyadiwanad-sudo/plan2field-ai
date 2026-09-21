@@ -61,7 +61,7 @@ proposalsRouter.get("/", async (req, res) => {
   res.json(
     (
       await pool.query(
-        "SELECT p.*,r.original_text,r.transcript,r.source_type,r.reporting_date,r.id AS report_id FROM staged_proposals p JOIN report_events e ON e.id=p.report_event_id JOIN site_reports r ON r.id=e.site_report_id WHERE p.project_id=$1 AND ($2::text IS NULL OR p.lifecycle_status=$2) ORDER BY r.received_at DESC LIMIT $3 OFFSET $4",
+        "SELECT p.*,r.original_text,r.transcript,r.source_type,r.reporting_date,r.id AS report_id,r.submitted_by,r.reporter_role,r.received_at,e.discipline,e.evidence AS source_evidence FROM staged_proposals p JOIN report_events e ON e.id=p.report_event_id JOIN site_reports r ON r.id=e.site_report_id WHERE p.project_id=$1 AND ($2::text IS NULL OR p.lifecycle_status=$2) ORDER BY r.received_at DESC LIMIT $3 OFFSET $4",
         [res.locals.projectId, status || null, p.limit, p.offset],
       )
     ).rows,
@@ -135,7 +135,7 @@ proposalsRouter.patch("/:proposalId", async (req, res) => {
       );
       const updated = (
         await c.query(
-          "UPDATE staged_proposals SET selected_activity_id=$2,proposed_changes=$3,expected_activity_row_version=$4,proposal_version=proposal_version+1,missing_fields='[]',lifecycle_status='PENDING',routing_status='REVIEW_NEEDED',match_score=$5,raw_scores=$6 WHERE id=$1 RETURNING *",
+          "UPDATE staged_proposals SET selected_activity_id=$2,proposed_changes=$3,expected_activity_row_version=$4,proposal_version=proposal_version+1,missing_fields='[]',lifecycle_status='PENDING',routing_status='REVIEW_NEEDED',match_score=$5,raw_scores=$6,proposed_variance='{}' WHERE id=$1 RETURNING *",
           [
             p.id,
             a.id,

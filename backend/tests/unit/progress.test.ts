@@ -17,3 +17,10 @@ test('missing dates and incompatible units are rejected',()=>{assert.throws(()=>
 test('lower cumulative observations require explicit correction',()=>{assert.throws(()=>calculateProgress({...a,accepted_quantity:'5',physical_percent_complete:'50',measurement_method:'QUANTITY'},{...event,quantity_mode:'CUMULATIVE',component_ids:[],quantity:3},[],[]));});
 test('aggregate component mixing requires reconciliation',()=>{assert.throws(()=>calculateProgress({...a,accepted_quantity:'3',physical_percent_complete:'30'},event,components,[]));});
 test('finish requires an approved start and complete scope',()=>{assert.throws(()=>calculateProgress(a,{...event,event_type:'FINISH'},components,[]));});
+test('percentage normalizes only quantity-measured scope',()=>{
+ const percent={...event,physical_percent:42.5,quantity:null,quantity_mode:null,component_ids:[]};
+ const r=calculateProgress({...a,measurement_method:'QUANTITY'},percent,[],[]);
+ assert.equal(r.accepted_quantity,'4.25');assert.equal(r.physical_percent_complete,'42.5');
+ assert.throws(()=>calculateProgress(a,percent,components,[]),/component identities/);
+ assert.throws(()=>calculateProgress({...a,measurement_method:'QUANTITY'},{...percent,quantity:3},[],[]),/either percentage/);
+});

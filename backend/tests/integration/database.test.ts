@@ -11,6 +11,7 @@ test('schema and role protection on a disposable real PostgreSQL database',{skip
   const schema=await readFile(new URL('../../../database/schema.sql',import.meta.url),'utf8');
   assert.equal(schema,await readFile(new URL('../../../database/migrations/001_initial.sql',import.meta.url),'utf8'));
   await c.query(schema);
+  await c.query(await readFile(new URL('../../../database/migrations/002_enterprise_evidence.sql',import.meta.url),'utf8'));
   const grants=(await readFile(new URL('../../../database/roles.sql',import.meta.url),'utf8')).split('\n').filter(l=>!l.startsWith('CREATE ROLE')&&!l.startsWith('GRANT CONNECT')).join('\n');
   await c.query(grants);
   const vector=(await c.query("SELECT extversion FROM pg_extension WHERE extname='vector'")).rows[0];assert.ok(vector);

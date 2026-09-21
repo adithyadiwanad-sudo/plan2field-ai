@@ -62,14 +62,17 @@ export default function ReviewerQueue() {
                 onClick={() => setSelected(row.id)}
               >
                 <span className="status">
-                  {row.routing_status.replaceAll("_", " ")}
+                  {(row.match_classification || row.routing_status).replaceAll(
+                    "_",
+                    " ",
+                  )}
                 </span>
                 <b>
-                  {row.proposed_changes.event_type} · {row.reporting_date}
+                  {row.proposed_changes.event_type} · {row.proposed_changes.event_date || row.reporting_date}
                 </b>
-                <p>{row.original_text || row.transcript}</p>
+                <p>{row.source_evidence?.text || row.original_text || row.transcript}</p>
                 <small>
-                  Report {row.report_id.slice(0, 8)} · {row.source_type}
+                  {row.discipline || row.proposed_changes.discipline || "Unknown discipline"} · Report {row.report_id.slice(0, 8)} · {row.source_type}
                 </small>
               </button>
             ))}
@@ -171,7 +174,30 @@ function ReviewDetail({ p, projectId, onChange }) {
         </div>
         <span className="status">{p.lifecycle_status}</span>
       </div>
-      <blockquote>{p.original_text || p.transcript}</blockquote>
+      <p className="notice">
+        <strong>
+          {p.match_classification === "AUTO_LINKED"
+            ? "Auto-Linked · Staged for approval"
+            : "Planner Review Required"}
+        </strong>{" "}
+        · {(p.match_classification || p.routing_status).replaceAll("_", " ")}
+      </p>
+      <blockquote>
+        {p.source_evidence?.text || p.original_text || p.transcript}
+      </blockquote>
+      <p className="muted">
+        {p.discipline || event.discipline || "Discipline unknown"} · Reporter{" "}
+        {p.submitted_by || "Unavailable"} · {p.reporter_role || "UNKNOWN"} ·{" "}
+        {p.received_at ? new Date(p.received_at).toLocaleString() : ""}
+      </p>
+      {p.proposed_variance?.variance_days != null && (
+        <p className="notice">
+          Staged {p.proposed_variance.field}:{" "}
+          {p.proposed_variance.variance_days > 0 ? "+" : ""}
+          {p.proposed_variance.variance_days} calendar days vs. baseline.
+          Actuals change only after approval.
+        </p>
+      )}
       {p.transcript && p.original_text && <p>{p.transcript}</p>}
       {p.source_type === "VOICE" && (
         <audio
@@ -192,6 +218,42 @@ function ReviewDetail({ p, projectId, onChange }) {
         }}
       />
       <div className="form-grid">
+        <label>
+          Discipline
+          <select
+            aria-label="Discipline"
+            value={event.discipline || ""}
+            onChange={(e) => edit("discipline", e.target.value || null)}
+          >
+            <option value="">Unknown</option>
+            {[
+              "CIVIL",
+              "PIPING",
+              "ELECTRICAL",
+              "MECHANICAL",
+              "INSTRUMENTATION",
+              "HSSE",
+            ].map((d) => (
+              <option key={d}>{d}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Physical progress (%)
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="any"
+            value={event.physical_percent ?? ""}
+            onChange={(e) =>
+              edit(
+                "physical_percent",
+                e.target.value === "" ? null : Number(e.target.value),
+              )
+            }
+          />
+        </label>
         <label>
           Event date
           <input
@@ -222,6 +284,11 @@ function ReviewDetail({ p, projectId, onChange }) {
               "INSPECTION",
               "CIVIL",
               "INSULATION",
+              "INSTALLATION",
+              "CALIBRATION",
+              "ALIGNMENT",
+              "ENERGIZATION",
+              "HSSE",
             ].map((v) => (
               <option key={v}>{v}</option>
             ))}

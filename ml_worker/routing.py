@@ -2,9 +2,10 @@ def score_and_route(event,candidates,policy):
     reasons=[];missing=list(event.missing_fields)
     if event.negated or event.future_intent or event.event_type in ('UNKNOWN','PLAN','BLOCKER'):
         return 'REJECTED',['NOT_ACTUAL_EVIDENCE'],missing
-    if not candidates:return 'REJECTED',['NO_COMPATIBLE_ACTIVITY'],missing
+    if not candidates:return 'REVIEW_NEEDED',['NO_COMPATIBLE_ACTIVITY'],missing
     for field,value in [('line_number',event.line_number),('asset_tag',event.asset_tag),('discipline',event.discipline),('area',event.area),('activity_type',event.action)]:
         if value and not candidates[0].get(field):missing.append('activity_'+field)
+    if event.physical_percent is not None:reasons.append('PERCENT_MEASUREMENT_REVIEW')
     if event.event_type=='CORRECTION':reasons.append('EXPLICIT_CORRECTION_REVIEW')
     if event.quantity_mode in ('CUMULATIVE','INCREMENTAL'):reasons.append('AGGREGATE_OVERLAP_REVIEW')
     if missing:reasons.append('MISSING_FIELDS')

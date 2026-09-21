@@ -5,11 +5,14 @@ import { displayDate, signed } from "../lib/dates";
 import GanttChart from "./GanttChart";
 export default function VarianceDashboard({ data, project }) {
   const [search, setSearch] = useState(""),
+    [discipline, setDiscipline] = useState("ALL"),
     [view, setView] = useState("table");
-  const rows = data.activities.filter((a) =>
-    (a.description + " " + a.external_activity_id + " " + a.wbs_path)
-      .toLowerCase()
-      .includes(search.toLowerCase()),
+  const rows = data.activities.filter(
+    (a) =>
+      (discipline === "ALL" || a.discipline === discipline) &&
+      (a.description + " " + a.external_activity_id + " " + a.wbs_path)
+        .toLowerCase()
+        .includes(search.toLowerCase()),
   );
   return (
     <section className="panel">
@@ -17,7 +20,10 @@ export default function VarianceDashboard({ data, project }) {
         <div>
           <span className="eyebrow">LIVE SCHEDULE</span>
           <h2>Execution progress</h2>
-          <p>Approved actuals against the protected baseline</p>
+          <p>
+            Planned vs. actual · Imported Primavera L1–L6 WBS hierarchy where
+            supplied
+          </p>
         </div>
         <div className="segmented">
           <button
@@ -33,6 +39,25 @@ export default function VarianceDashboard({ data, project }) {
             <ChartNoAxesGantt size={16} /> Gantt
           </button>
         </div>
+      </div>
+      <div className="discipline-tabs" aria-label="Filter discipline">
+        {[
+          "ALL",
+          "CIVIL",
+          "PIPING",
+          "ELECTRICAL",
+          "MECHANICAL",
+          "INSTRUMENTATION",
+          "HSSE",
+        ].map((d) => (
+          <button
+            key={d}
+            aria-pressed={discipline === d}
+            onClick={() => setDiscipline(d)}
+          >
+            {d === "ALL" ? "All" : d[0] + d.slice(1).toLowerCase()}
+          </button>
+        ))}
       </div>
       <div className="table-toolbar">
         <label className="search">
@@ -54,7 +79,7 @@ export default function VarianceDashboard({ data, project }) {
             <thead>
               <tr>
                 <th>Activity / WBS</th>
-                <th>Baseline dates</th>
+                <th>Planned / baseline dates</th>
                 <th>Actual dates</th>
                 <th>Physical progress</th>
                 <th>Start Δ</th>
@@ -72,6 +97,9 @@ export default function VarianceDashboard({ data, project }) {
                     </Link>
                     <small>{a.external_activity_id}</small>
                     <small className="wbs">{a.wbs_path}</small>
+                    <small>
+                      {a.discipline} · WBS depth {a.wbs_path.split(".").length}
+                    </small>
                   </td>
                   <td>
                     {displayDate(a.baseline_start)}
@@ -113,7 +141,17 @@ export default function VarianceDashboard({ data, project }) {
                           ? "In progress"
                           : "Not started"}
                     </span>
-                    <small>{a.pending_reviews || 0} pending reviews</small>
+                    <small className="status">Baseline Protected</small>
+                    {a.auto_linked > 0 && (
+                      <small className="status accepted">
+                        Auto-Linked · {a.auto_linked}
+                      </small>
+                    )}
+                    {a.pending_reviews > 0 && (
+                      <small className="status">
+                        In Review Queue · {a.pending_reviews}
+                      </small>
+                    )}
                     <small>
                       {a.last_accepted_update
                         ? "Updated " +

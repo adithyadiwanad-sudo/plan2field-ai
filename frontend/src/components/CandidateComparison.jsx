@@ -13,6 +13,7 @@ export default function CandidateComparison({ candidates, value, onChange }) {
             name="candidate"
             value={a.id}
             checked={value === a.id}
+            disabled={!!a.conflicts?.length}
             onChange={() => onChange(a.id)}
           />
           <span>
@@ -25,10 +26,16 @@ export default function CandidateComparison({ candidates, value, onChange }) {
               {a.wbs_path} · {a.discipline}
             </small>
             <small>{a.reasons?.join(" · ")}</small>
+            {!!a.conflicts?.length && (
+              <small>
+                Incompatible: {a.conflicts.join(", ")} · clarify the evidence
+              </small>
+            )}
           </span>
           <span className="match-score">
             {score(a.rerank_score)}
-            <small>Match score</small>
+            <small>Reranker score</small>
+            <small>Cosine {score(a.retrieval_score)}</small>
           </span>
         </label>
       ))}

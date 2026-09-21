@@ -8,7 +8,7 @@ export const page = (q: any) => ({
 });
 export const activitiesRouter = Router({ mergeParams: true });
 export const activityQuery =
-  "SELECT a.*,b.baseline_start,b.baseline_finish,b.provenance AS baseline_provenance,(a.actual_start-b.baseline_start) AS start_variance_days,(a.actual_finish-b.baseline_finish) AS finish_variance_days,(SELECT max(committed_at) FROM progress_events e WHERE e.activity_id=a.id) AS last_accepted_update,(SELECT count(*)::int FROM staged_proposals p WHERE p.selected_activity_id=a.id AND p.lifecycle_status='PENDING') AS pending_reviews FROM schedule_activities a LEFT JOIN activity_baselines b ON b.activity_id=a.id";
+  "SELECT a.*,b.baseline_start,b.baseline_finish,b.provenance AS baseline_provenance,(a.actual_start-b.baseline_start) AS start_variance_days,(a.actual_finish-b.baseline_finish) AS finish_variance_days,(SELECT max(committed_at) FROM progress_events e WHERE e.activity_id=a.id) AS last_accepted_update,(SELECT count(*)::int FROM staged_proposals p WHERE p.selected_activity_id=a.id AND p.lifecycle_status='PENDING') AS pending_reviews,(SELECT count(*)::int FROM staged_proposals p WHERE p.selected_activity_id=a.id AND p.routing_status='AUTO_STAGED' AND p.lifecycle_status='PENDING') AS auto_linked FROM schedule_activities a LEFT JOIN activity_baselines b ON b.activity_id=a.id";
 activitiesRouter.get("/", async (req, res) => {
   const p = page(req.query);
   res.json(

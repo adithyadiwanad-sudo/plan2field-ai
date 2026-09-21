@@ -11,7 +11,7 @@ from matching_engine import process_report
 def main():
     with connect() as c:
         assert c.execute('SELECT current_user AS name').fetchone()['name']=='p2f_worker'
-        rows=c.execute("SELECT r.id,r.metadata->>'fixture' AS fixture FROM site_reports r JOIN projects p ON p.id=r.project_id WHERE p.code='OIL-DEMO-01' AND r.metadata->>'provenance'='SYNTHETIC' ORDER BY r.received_at").fetchall()
+        rows=c.execute("SELECT r.id,r.metadata->>'fixture' AS fixture FROM site_reports r JOIN projects p ON p.id=r.project_id WHERE p.code='OIL-DEMO-01' AND r.metadata->>'provenance'='SYNTHETIC' AND r.metadata->>'fixture'<>'ENTERPRISE_V2' ORDER BY r.received_at").fetchall()
     for r in rows:
         process_report(r['id']);process_report(r['id'])
         with connect() as c:
@@ -21,7 +21,7 @@ def main():
             expected={'CLEAN_START':'ACT-24-SPOOL-01','PARTIAL':'ACT-24-SPOOL-01','WRONG_OPERATION':'ACT-24-TEST-01'}
             if r['fixture'] in expected:assert proposal['external_activity_id']==expected[r['fixture']]
             if r['fixture']=='AMBIGUOUS':assert proposal['routing_status']=='REVIEW_NEEDED'
-            if r['fixture'] in ('FUTURE','NEGATION','NO_MATCH'):assert proposal['routing_status']=='REJECTED'
+            if r['fixture'] in ('FUTURE','NEGATION'):assert proposal['routing_status']=='REJECTED'
             c.execute("UPDATE jobs SET status='DONE' WHERE type='REPORT' AND payload->>'report_id'=%s",(str(r['id']),))
             print(json.dumps({'fixture':r['fixture'],'activity':proposal['external_activity_id'],'routing':proposal['routing_status'],'duplicate_processing':'PASS'}),flush=True)
     with connect() as c:

@@ -17,6 +17,7 @@ def main():
         if not tables:conn.execute((root/'database/schema.sql').read_text())
         elif not set(['projects','activity_baselines','progress_events','staged_proposals']).issubset(tables):raise RuntimeError('Database contains other tables. Refusing an unreviewed schema initialization.')
         else:print('Existing Plan2Field schema preserved; initial DDL not reapplied.')
+        conn.execute((root/'database/migrations/002_enterprise_evidence.sql').read_text(encoding='utf-8'))
         for role in ['p2f_api','p2f_worker']:
             if not conn.execute('SELECT 1 FROM pg_roles WHERE rolname=%s',(role,)).fetchone():conn.execute(sql.SQL('CREATE ROLE {} LOGIN').format(sql.Identifier(role)))
         grants=(root/'database/roles.sql').read_text()

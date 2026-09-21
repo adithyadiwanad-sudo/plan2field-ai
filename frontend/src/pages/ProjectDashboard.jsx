@@ -18,6 +18,7 @@ export default function ProjectDashboard() {
     { current } = useOutletContext();
   const q = useQuery({
     queryKey: ["variance", projectId],
+    refetchInterval: 10000,
     queryFn: () => api(`/projects/${projectId}/variance?limit=200`),
   });
   return (
@@ -102,7 +103,13 @@ export default function ProjectDashboard() {
                 update proposals for review.
               </p>
               <a href={`/api/projects/${projectId}/exports?format=csv`}>
-                Export update proposals <ArrowUpRight size={16} />
+                Enterprise Export · CSV <ArrowUpRight size={16} />
+              </a>
+              <a
+                className="secondary"
+                href={`/api/projects/${projectId}/exports?format=json`}
+              >
+                Enterprise Export · JSON
               </a>
             </section>
           </div>

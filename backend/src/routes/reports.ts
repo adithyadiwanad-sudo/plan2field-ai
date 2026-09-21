@@ -23,6 +23,16 @@ export const reportSchema = z
     reporting_date: date,
     captured_at: z.string().datetime(),
     idempotency_key: z.string().uuid(),
+    discipline: z
+      .enum([
+        "CIVIL",
+        "PIPING",
+        "ELECTRICAL",
+        "MECHANICAL",
+        "INSTRUMENTATION",
+        "HSSE",
+      ])
+      .optional(),
     mapping: z.string().max(2000).optional(),
   })
   .refine(

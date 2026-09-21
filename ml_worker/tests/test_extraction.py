@@ -30,4 +30,4 @@ def test_hard_gates():
 def test_ambiguity_and_no_match():
     e=extract('Spool erection started in the north area on 12 September 2026.')
     assert score_and_route(e,[{'rerank_score':5,'activity_type':'ERECTION','area':'NORTH'}],{'threshold':2,'margin':1})[0]=='REVIEW_NEEDED'
-    assert score_and_route(e,[],{'threshold':2,'margin':1})[0]=='REJECTED'
+    assert score_and_route(e,[],{'threshold':2,'margin':1})[0]=='REVIEW_NEEDED'

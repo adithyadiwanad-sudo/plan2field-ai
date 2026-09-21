@@ -1,4 +1,4 @@
-import { day, displayDate } from "../lib/dates";
+import { day, displayDate, signed } from "../lib/dates";
 export default function GanttChart({ activities, reportingDate }) {
   const dates = activities
     .flatMap((a) => [
@@ -26,6 +26,13 @@ export default function GanttChart({ activities, reportingDate }) {
         <div className="gantt-row" key={a.id}>
           <div>
             <b>{a.external_activity_id}</b>
+            <small>
+              {a.discipline} · {a.wbs_path}
+            </small>
+            <small>
+              Start Δ {signed(a.start_variance_days)} · Finish Δ{" "}
+              {signed(a.finish_variance_days)}
+            </small>
             <small>
               {Number(a.physical_percent_complete).toFixed(1)}% physical
               complete

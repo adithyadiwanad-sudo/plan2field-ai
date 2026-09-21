@@ -17,7 +17,9 @@ Required: `external_activity_id, description, wbs_path, activity_type, planned_t
 
 Optional: `discipline, area, line_number, asset_tag, baseline_start, baseline_finish, forecast_start, forecast_finish, components, weights, relationships`.
 
-Operations use explicit `ERECTION`, `FABRICATION`, `WELDING`, `INSPECTION`, `TESTING`, `INSULATION` or `CIVIL` definitions. This mapping is domain metadata, not the scheduling source's task-type enum.
+Operations use explicit `ERECTION`, `FABRICATION`, `WELDING`, `INSPECTION`, `TESTING`, `INSULATION`, `CIVIL`, `INSTALLATION`, `CALIBRATION`, `ALIGNMENT`, `ENERGIZATION` or `HSSE` definitions. This mapping is domain metadata, not the scheduling source's task-type enum.
+
+Report spreadsheets may include a `discipline` column alongside `report_text`; API mappings can rename either column. Row discipline applies to that row's events. All six supported disciplines share normalization for text and transcripts. Percentage observations are stored explicitly and require quantity-based scope or planner clarification of component evidence. See [enterprise evidence](enterprise-evidence.md).
 
 Dates are ISO `YYYY-MM-DD`. Quantity must be positive and finite. Methods: `QUANTITY`, `EQUAL_COMPONENTS`, `WEIGHTED_COMPONENTS`. Component IDs are pipe-separated, e.g. `S01|S02|S03`; weighted definitions have matching positive pipe-separated weights. Component count must equal planned quantity for the bounded demo measurement model.
 

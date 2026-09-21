@@ -38,6 +38,7 @@ export function calculateProgress(
   completed: string[],
 ) {
   validateSelection(e, a);
+  e = normalizeMeasurement(e, a);
   let quantity = new Decimal(a.accepted_quantity),
     percent = new Decimal(a.physical_percent_complete);
   let ids = [...new Set(completed)];
@@ -121,4 +122,26 @@ export function calculateProgress(
     physical_percent_complete: percent.toString(),
     component_ids: ids,
   };
+}
+
+export function normalizeMeasurement(e: Event, a: any): Event {
+  if (e.physical_percent != null) {
+    if (a.measurement_method !== "QUANTITY")
+      fail(
+        "Percentage evidence requires a quantity-measured activity; confirm component identities for component work.",
+      );
+    if (e.quantity != null || e.component_ids.length)
+      fail("Use either percentage or quantity/component evidence, not both.");
+    e = {
+      ...e,
+      physical_percent: null,
+      quantity: new Decimal(a.planned_total_quantity)
+        .mul(e.physical_percent)
+        .div(100)
+        .toNumber(),
+      unit: a.quantity_unit,
+      quantity_mode: "CUMULATIVE",
+    };
+  }
+  return e;
 }

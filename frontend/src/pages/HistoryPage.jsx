@@ -4,15 +4,16 @@ import { api } from "../api/client";
 import ErrorState from "../components/ErrorState";
 export default function HistoryPage() {
   const [demo, setDemo] = useState(false),
+    [discipline, setDiscipline] = useState(""),
     [unit, setUnit] = useState(""),
     [work, setWork] = useState("");
   const [quantity, setQuantity] = useState(""),
     [area, setArea] = useState("");
   const q = useQuery({
-    queryKey: ["history", demo, unit, work, quantity, area],
+    queryKey: ["history", demo, unit, work, quantity, area, discipline],
     queryFn: () =>
       api(
-        `/history/comparables?demo=${demo}${unit ? "&unit=" + encodeURIComponent(unit) : ""}${work ? "&work_type=" + encodeURIComponent(work) : ""}${quantity ? "&quantity=" + encodeURIComponent(quantity) : ""}${area ? "&area=" + encodeURIComponent(area) : ""}`,
+        `/history/comparables?demo=${demo}${discipline ? "&discipline=" + discipline : ""}${unit ? "&unit=" + encodeURIComponent(unit) : ""}${work ? "&work_type=" + encodeURIComponent(work) : ""}${quantity ? "&quantity=" + encodeURIComponent(quantity) : ""}${area ? "&area=" + encodeURIComponent(area) : ""}`,
       ),
   });
   return (
@@ -20,12 +21,32 @@ export default function HistoryPage() {
       <div className="page-heading">
         <div>
           <span className="eyebrow">HISTORICAL KNOWLEDGE</span>
-          <h1>Learn from completed work.</h1>
+          <h1>Institutional Memory</h1>
           <p>Comparable records with visible provenance and date evidence.</p>
         </div>
       </div>
       <section className="panel composer">
         <div className="form-grid">
+          <label>
+            Discipline
+            <select
+              aria-label="Discipline"
+              value={discipline}
+              onChange={(e) => setDiscipline(e.target.value)}
+            >
+              <option value="">All disciplines</option>
+              {[
+                "CIVIL",
+                "PIPING",
+                "ELECTRICAL",
+                "MECHANICAL",
+                "INSTRUMENTATION",
+                "HSSE",
+              ].map((d) => (
+                <option key={d}>{d}</option>
+              ))}
+            </select>
+          </label>
           <label>
             Comparable quantity (±25%)
             <input
@@ -48,7 +69,18 @@ export default function HistoryPage() {
             <select value={work} onChange={(e) => setWork(e.target.value)}>
               <option value="">All work types</option>
               <option>ERECTION</option>
-              <option>FABRICATION</option>
+              {[
+                "FABRICATION",
+                "CIVIL",
+                "INSTALLATION",
+                "TESTING",
+                "CALIBRATION",
+                "ALIGNMENT",
+                "ENERGIZATION",
+                "HSSE",
+              ].map((w) => (
+                <option key={w}>{w}</option>
+              ))}
             </select>
           </label>
           <label>
@@ -88,11 +120,21 @@ export default function HistoryPage() {
                   : `Median ${s.median} days`}
               </p>
             ))}
+            <h3>Recurring delay causes</h3>
+            <p className="muted">{q.data.summary_scope}</p>
+            {!q.data.delay_causes?.length && (
+              <p>No recorded delay causes in this selection.</p>
+            )}
+            {q.data.delay_causes?.map((c) => (
+              <p key={c.cause}>
+                {c.cause} · {c.count} record{c.count === 1 ? "" : "s"}
+              </p>
+            ))}
             {q.data.records.map((r) => (
               <article className="history-record" key={r.id}>
                 <span className="pill">{r.provenance}</span>
                 <h3>
-                  {r.project_name} · {r.work_type}
+                  {r.project_name} · {r.discipline} · {r.work_type}
                 </h3>
                 <p>
                   {r.quantity} {r.unit} · Baseline {r.baseline_duration} /
@@ -100,6 +142,17 @@ export default function HistoryPage() {
                   {r.duration_basis.toLowerCase().replaceAll("_", " ")}
                 </p>
                 <p>{r.deviation_reason}</p>
+                {r.context?.progress_pattern?.length > 0 && (
+                  <details>
+                    <summary>Verified progress pattern</summary>
+                    {r.context.progress_pattern.map((e) => (
+                      <p key={e.source_event_id}>
+                        {e.effective_date} · {e.event_type} ·{" "}
+                        {e.physical_percent}% physical complete
+                      </p>
+                    ))}
+                  </details>
+                )}
                 <small>Context: {JSON.stringify(r.context)}</small>
                 <details>
                   <summary>Date evidence</summary>

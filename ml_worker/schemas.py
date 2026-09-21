@@ -11,6 +11,7 @@ class Event(BaseModel):
     asset_tag: str | None = None
     area: str | None = None
     discipline: str | None = None
+    physical_percent: float | None = Field(default=None, ge=0, le=100)
     quantity: float | None = Field(default=None, ge=0)
     unit: str | None = None
     quantity_mode: Literal['INCREMENTAL','CUMULATIVE','COMPONENT_SET'] | None = None

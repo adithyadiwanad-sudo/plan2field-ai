@@ -60,7 +60,23 @@ historyRouter.get("/comparables", async (req, res) => {
       max: values[n - 1],
     };
   });
+  const causes = new Map<string, number>();
+  for (const r of records) {
+    if (r.actual_duration > r.baseline_duration && r.deviation_reason?.trim()) {
+      const key = [
+        r.discipline,
+        r.provenance,
+        r.deviation_reason.trim().toLowerCase(),
+      ].join(" / ");
+      causes.set(key, (causes.get(key) || 0) + 1);
+    }
+  }
   res.json({
+    delay_causes: [...causes.entries()]
+      .map(([cause, count]) => ({ cause, count }))
+      .sort((a, b) => b.count - a.count),
+    summary_scope:
+      "Current filtered page; calendar-day durations, not a forecast",
     records,
     summaries,
     message: records.length

@@ -1,4 +1,10 @@
-import { NavLink, Outlet, useParams, useNavigate } from "react-router-dom";
+import {
+  NavLink,
+  Outlet,
+  useParams,
+  useNavigate,
+  Navigate,
+} from "react-router-dom";
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -18,8 +24,24 @@ export default function AppShell({ user, onLogout }) {
   const { projectId } = useParams(),
     navigate = useNavigate();
   const query = useQuery({ queryKey: ["projects"], queryFn: projects });
-  const current = query.data?.find((p) => p.id === projectId);
-  const base = `/projects/${projectId}`;
+  const fallback =
+    query.data?.find((p) => p.status === "ACTIVE") || query.data?.[0];
+  const current =
+    query.data?.find((p) => p.id === projectId) ||
+    (!projectId ? fallback : null);
+  if (query.isPending) return <p className="empty">Loading workspace…</p>;
+  if (query.error)
+    return (
+      <p className="empty">
+        Unable to load workspace.{" "}
+        <button onClick={() => query.refetch()}>Retry</button>
+      </p>
+    );
+  if (!fallback)
+    return <p className="empty">No project memberships are available.</p>;
+  if (projectId && !current)
+    return <Navigate to={`/projects/${fallback.id}`} replace />;
+  const base = `/projects/${current.id}`;
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -40,7 +62,7 @@ export default function AppShell({ user, onLogout }) {
         </label>
         <select
           id="project"
-          value={projectId || ""}
+          value={current?.id || ""}
           onChange={(e) => navigate(`/projects/${e.target.value}`)}
         >
           <option value="" disabled>

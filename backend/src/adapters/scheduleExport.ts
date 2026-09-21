@@ -8,7 +8,13 @@ export interface ScheduleAdapter {
 export const connectorStatus = "External scheduling system not connected";
 export function csvCell(value: unknown) {
   let s =
-    typeof value === "object" ? JSON.stringify(value) : String(value ?? "");
+    value == null
+      ? ""
+      : value instanceof Date
+        ? value.toISOString()
+        : typeof value === "object"
+          ? JSON.stringify(value)
+          : String(value);
   if (/^[=+@\-\t\r]/.test(s)) s = "'" + s;
   return '"' + s.replaceAll('"', '""') + '"';
 }

@@ -29,6 +29,9 @@ def prepare_report(report):
     elif report['source_type']=='SPREADSHEET':
         from parsers.progress_spreadsheet import parse
         evidence=parse(path.read_bytes(),json.loads(report['metadata'].get('mapping') or '{}'));text='\n'.join(r['text'] for r in evidence)
+        offset=0
+        for record in evidence:
+            record['start']=offset;record['end']=offset+len(record['text']);offset=record['end']+1
     else:
         from parsers.scanned_diary import parse
         evidence=parse(path.read_bytes());text='\n'.join(r['text'] for r in evidence)

@@ -3,7 +3,7 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
-import { requestId,throttled } from "./middleware/requestId.js";
+import { requestId, throttled } from "./middleware/requestId.js";
 import { errors } from "./middleware/errors.js";
 import { auth } from "./middleware/auth.js";
 import { projectAccess, reviewer } from "./middleware/projectAccess.js";
@@ -25,7 +25,7 @@ app.use(
   helmet(),
   cookieParser(),
   express.json({ limit: "100kb" }),
-  rateLimit({ windowMs: 60000, limit: 180, handler:throttled }),
+  rateLimit({ windowMs: 60000, limit: 180, handler: throttled }),
 );
 app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);
@@ -77,8 +77,8 @@ app.get(root + "/exports", async (req, res) => {
     req.query.format === "csv" ? "csv" : undefined,
   );
   if (req.query.format === "csv") {
-    res.type("text/csv").attachment("update-proposals.csv").send(result);
-  } else res.json(result);
+    res.type("text/csv").attachment("enterprise-proposals.csv").send(result);
+  } else res.attachment("enterprise-proposals.json").json(result);
 });
 app.post(root + "/closeout", async (req, res) => {
   reviewer(res);

@@ -1,4 +1,5 @@
 import { transaction } from "../db/transactions.js";
+import { normalizeMeasurement } from "./progressService.js";
 import { eventSchema } from "../schemas/event.js";
 import { revalidate } from "./proposalService.js";
 import { lockActivity } from "../repositories/activityRepository.js";
@@ -57,7 +58,7 @@ export async function approve(
         "STALE_PROPOSAL",
         "Activity actuals changed. Refresh and revalidate the proposal.",
       );
-    const e = eventSchema.parse(p.proposed_changes);
+    const e = normalizeMeasurement(eventSchema.parse(p.proposed_changes), a);
     const last = (
       await c.query(
         "SELECT * FROM progress_events WHERE activity_id=$1 ORDER BY effective_date DESC,committed_at DESC LIMIT 1",

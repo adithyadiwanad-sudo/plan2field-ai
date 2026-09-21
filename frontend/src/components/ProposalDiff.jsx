@@ -52,8 +52,9 @@ export default function ProposalDiff({ activity, event, preview }) {
             <td>{activity.accepted_quantity}</td>
             <td>
               {event.component_ids?.join(", ") ||
-                event.quantity ||
-                "No quantity change"}
+                (event.physical_percent != null
+                  ? `${event.physical_percent}% physical progress`
+                  : (event.quantity ?? "No quantity change"))}
               <small>{event.quantity_mode}</small>
             </td>
           </tr>

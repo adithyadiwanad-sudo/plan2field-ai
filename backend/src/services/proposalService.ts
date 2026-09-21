@@ -1,5 +1,5 @@
 import { eventSchema } from "../schemas/event.js";
-import { calculateProgress } from "./progressService.js";
+import { calculateProgress, normalizeMeasurement } from "./progressService.js";
 import { ApiError } from "../middleware/errors.js";
 export async function revalidate(
   c: any,
@@ -7,7 +7,7 @@ export async function revalidate(
   changes: any,
   reportingDate: string,
 ) {
-  const event = eventSchema.parse(changes);
+  const event = normalizeMeasurement(eventSchema.parse(changes), activity);
   if (event.event_date && event.event_date > reportingDate)
     throw new ApiError(
       422,

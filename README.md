@@ -6,6 +6,8 @@ SIH26122 · Oil India Limited challenge · independent prototype. All included p
 
 ## What is implemented
 
+The [enterprise evidence update](docs/enterprise-evidence.md) documents six-discipline ingestion, explicit unmatched/low-confidence review, traceability, Institutional Memory, dashboard filters and the versioned P6/SAP integration export contract.
+
 - PostgreSQL/pgvector schedule versions, protected baselines, asynchronous reports/jobs, review proposals, immutable accepted events and audit.
 - Local Sentence-Transformers bi-encoder retrieval, CrossEncoder reranking and engineering identifier/operation gates. Extraction uses the visible `deterministic-v1` English vocabulary provider.
 - Transactional approvals with activity/proposal version checks, stable request keys, component deduplication, weighted physical progress and explicit corrections.
@@ -32,7 +34,7 @@ Run each service from the repository root in a separate terminal:
 .\.venv\Scripts\python.exe scripts/run_local.py frontend
 ```
 
-Open [http://localhost:5173](http://localhost:5173), using `DEMO_EMAIL` and `DEMO_PASSWORD` from `.env`. The API listens on port 3001; Vite proxies `/api`. The worker uses locally cached semantic models and the restricted database role.
+Open [http://localhost:8080](http://localhost:8080), using `DEMO_EMAIL` and `DEMO_PASSWORD` from `.env`. The API listens on port 3001; Vite proxies `/api`. This workspace sets `FRONTEND_PORT=8080` and `APP_ORIGIN=http://localhost:8080` because port 5173 is used by another project. The worker uses locally cached semantic models and the restricted database role.
 
 Cloud verification commands:
 

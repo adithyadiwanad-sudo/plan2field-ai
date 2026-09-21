@@ -25,6 +25,7 @@ export const eventSchema = z
     asset_tag: z.string().nullable().default(null),
     area: z.string().nullable(),
     discipline: z.string().nullable(),
+    physical_percent: z.number().min(0).max(100).nullable().optional(),
     quantity: z.number().nonnegative().nullable(),
     unit: z.string().nullable(),
     quantity_mode: z

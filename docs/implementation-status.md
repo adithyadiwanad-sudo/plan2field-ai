@@ -47,7 +47,20 @@ Preserved correction replacement clauses and independent source offsets; server-
 - Frontend production build passed after changing the landing route to prefer an active project.
 - Real Edge browser smoke passed against localhost:5173 and Neon: login, seeded ACT-24-SPOOL-01 schedule, persisted model proposal queue and full readiness. No API mocking or demo approvals. Screenshots: `docs/screenshots/cloud-dashboard.png` and `cloud-review.png`.
 
-## Remaining verification limits
+## Enterprise enhancement checkpoint — 21 September 2026
+
+- Applied additive migration 002 to Neon: per-event discipline, match classification, reporter-role snapshots, staged date variance and creation audit triggers. Existing baseline/actual records preserved.
+- Six-discipline text/transcript/spreadsheet normalization, percentage and measured-quantity evidence, explicit unmatched/low-confidence planner routing and candidate conflict explanations implemented.
+- Institutional Memory now filters discipline, summarizes recorded delay causes by provenance, and stores accepted progress-event patterns at closeout.
+- Dashboard discipline tabs, planned/actual WBS display, Gantt variances, live status badges and polling implemented. Undefined project routes recover to an accessible project; history navigation has valid project links.
+- Enterprise JSON/CSV contains only approved event snapshots with target mapping guidance and traceability. Native P6/SAP import still requires middleware mapping; no connector success is claimed.
+- Verification: backend/frontend production builds passed; 13 backend unit tests, 1 frontend unit test, and 28 Python normalization/parser/routing tests passed. Real Neon schema suite passed (1 test); approval/HTTP suite passed (9 tests including parent), including new role snapshot/audit/export assertions. Initial cloud timeout was resolved with a 20-second connection timeout and a successful rerun.
+- Real model/pgvector verification passed on a new synthetic six-event report: ACT-24-SPOOL-01 match, +2-day proposed variance, all six stored discipline tags, incompatible disciplines explicitly unmatched, audit creation, retry safety and unchanged actuals.
+- Real Edge smoke passed: login, seeded schedule, discipline filters, Gantt, ingestion controls, history navigation, invalid-project recovery, planner CTA, both export formats, mobile layout and full readiness. No approvals were performed on the demo database.
+- Current local app: http://localhost:8080, API on port 3001, local worker running. Port 5173 belongs to a separate portfolio project. `.env` now sets matching `FRONTEND_PORT` and `APP_ORIGIN`; database credentials unchanged.
+- Technical details and limitations: [enterprise evidence](enterprise-evidence.md). Existing records without a contemporaneous role snapshot remain UNKNOWN; no historical role is fabricated.
+
+### Remaining verification limits
 
 Docker Desktop and WSL remain unavailable locally; clean Compose startup has not been tested. Neon now supplies PostgreSQL/pgvector and removes the earlier database blocker. FFmpeg and Tesseract are absent locally and Whisper base was not downloaded, so voice transcription/OCR were not exercised. The five comprehensive browser workflow tests and a dedicated process-crash recovery test have not yet been run against the cloud stack.
 

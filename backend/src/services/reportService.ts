@@ -50,6 +50,7 @@ export async function submitReport(
           JSON.stringify({
             filename: file?.originalname,
             mapping: data.mapping,
+            discipline: data.discipline,
           }),
         ],
       )

@@ -4,5 +4,5 @@ pg.types.setTypeParser(1082, (value) => value);
 export const pool = new pg.Pool({
   connectionString: config.databaseUrl,
   max: 10,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 20000,
 });

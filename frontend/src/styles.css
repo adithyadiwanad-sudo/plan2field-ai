@@ -1203,3 +1203,38 @@ pre {
     gap: 8px;
   }
 }
+.discipline-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 24px 18px;
+}
+.discipline-tabs button {
+  border: 1px solid var(--border, #dce4df);
+  border-radius: 20px;
+  padding: 7px 14px;
+  background: #fff;
+  color: #365950;
+}
+.discipline-tabs button[aria-pressed="true"] {
+  background: #164f42;
+  color: #fff;
+  border-color: #164f42;
+}
+.gantt-row small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.callout a {
+  margin-right: 12px;
+  margin-bottom: 8px;
+}
+@media (max-width: 600px) {
+  .discipline-tabs {
+    padding: 0 14px 14px;
+    gap: 5px;
+  }
+  .discipline-tabs button {
+    padding: 6px 10px;
+  }
+}

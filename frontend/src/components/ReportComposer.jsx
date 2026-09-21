@@ -4,6 +4,7 @@ import VoiceRecorder from "./VoiceRecorder";
 import ErrorState from "./ErrorState";
 export default function ReportComposer({ project, queue }) {
   const [type, setType] = useState("TEXT"),
+    [discipline, setDiscipline] = useState(""),
     [text, setText] = useState(""),
     [file, setFile] = useState(null),
     [date, setDate] = useState(project?.reporting_date || ""),
@@ -17,13 +18,19 @@ export default function ReportComposer({ project, queue }) {
     try {
       await queue.enqueue(project.id, {
         source_type: type,
+        ...(discipline ? { discipline } : {}),
         original_text: text,
         reporting_date: date,
         captured_at: new Date().toISOString(),
         idempotency_key: crypto.randomUUID(),
         ...(file ? { file } : {}),
         ...(type === "SPREADSHEET"
-          ? { mapping: JSON.stringify({ text: "report_text" }) }
+          ? {
+              mapping: JSON.stringify({
+                text: "report_text",
+                discipline: "discipline",
+              }),
+            }
           : {}),
       });
       setText("");
@@ -44,7 +51,7 @@ export default function ReportComposer({ project, queue }) {
           <span className="eyebrow">NEW FIELD EVIDENCE</span>
           <h2>What happened on site?</h2>
         </div>
-        <span className="pill">deterministic-v1</span>
+        <span className="pill">Multi-discipline ingestion</span>
       </div>
       <div className="segmented">
         {["TEXT", "VOICE", "SPREADSHEET", "SCAN"].map((v) => (
@@ -61,6 +68,30 @@ export default function ReportComposer({ project, queue }) {
           </button>
         ))}
       </div>
+      <label>
+        Discipline
+        <select
+          aria-label="Discipline"
+          value={discipline}
+          onChange={(e) => setDiscipline(e.target.value)}
+        >
+          <option value="">Detect from each update / mixed disciplines</option>
+          {[
+            "CIVIL",
+            "PIPING",
+            "ELECTRICAL",
+            "MECHANICAL",
+            "INSTRUMENTATION",
+            "HSSE",
+          ].map((d) => (
+            <option key={d}>{d}</option>
+          ))}
+        </select>
+      </label>
+      <p className="muted">
+        Capture starts, finishes, physical percentages and measured quantities.
+        CSV/XLSX accepts report_text and an optional discipline column per row.
+      </p>
       <label>
         Reporting date
         <input
