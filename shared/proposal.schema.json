@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "required": [
+    "id",
+    "project_id",
+    "schedule_version_id",
+    "proposed_changes",
+    "routing_status",
+    "lifecycle_status",
+    "proposal_version"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "schedule_version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "proposed_changes": {
+      "$ref": "event.schema.json"
+    },
+    "candidate_matches": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "routing_status": {
+      "enum": ["AUTO_STAGED", "REVIEW_NEEDED", "REJECTED"]
+    },
+    "lifecycle_status": {
+      "enum": [
+        "PENDING",
+        "CLARIFICATION_REQUESTED",
+        "APPROVED",
+        "REJECTED",
+        "STALE",
+        "SUPERSEDED"
+      ]
+    },
+    "proposal_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "match_score": {
+      "type": ["number", "null"]
+    },
+    "score_type": {
+      "const": "HEURISTIC"
+    },
+    "calibrated_probability": {
+      "type": "null"
+    }
+  }
+}

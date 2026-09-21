@@ -1,0 +1,185 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "event_type": {
+      "enum": [
+        "START",
+        "FINISH",
+        "PROGRESS",
+        "BLOCKER",
+        "PLAN",
+        "CORRECTION",
+        "UNKNOWN"
+      ],
+      "title": "Event Type",
+      "type": "string"
+    },
+    "event_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Event Date"
+    },
+    "date_basis": {
+      "default": "EXPLICIT",
+      "title": "Date Basis",
+      "type": "string"
+    },
+    "action": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action"
+    },
+    "line_number": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Line Number"
+    },
+    "asset_tag": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Asset Tag"
+    },
+    "area": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Area"
+    },
+    "discipline": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Discipline"
+    },
+    "quantity": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quantity"
+    },
+    "unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unit"
+    },
+    "quantity_mode": {
+      "anyOf": [
+        {
+          "enum": ["INCREMENTAL", "CUMULATIVE", "COMPONENT_SET"],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Quantity Mode"
+    },
+    "component_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Component Ids",
+      "type": "array"
+    },
+    "negated": {
+      "default": false,
+      "title": "Negated",
+      "type": "boolean"
+    },
+    "future_intent": {
+      "default": false,
+      "title": "Future Intent",
+      "type": "boolean"
+    },
+    "evidence": {
+      "additionalProperties": true,
+      "title": "Evidence",
+      "type": "object"
+    },
+    "missing_fields": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Fields",
+      "type": "array"
+    },
+    "blockers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "correction_of_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Correction Of Event Id"
+    }
+  },
+  "required": ["event_type"],
+  "title": "Event",
+  "type": "object"
+}

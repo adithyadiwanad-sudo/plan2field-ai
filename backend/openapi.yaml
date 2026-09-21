@@ -1,0 +1,2232 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Plan2Field AI",
+    "version": "0.1.0",
+    "description": "Local prototype. All actual mutations require project review. No external scheduling writes."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "summary": "Start HttpOnly session",
+        "operationId": "post__auth_login",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "End session",
+        "operationId": "post__auth_logout",
+        "responses": {
+          "204": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Current user and CSRF token",
+        "operationId": "get__auth_me",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "summary": "Projects visible to the current user",
+        "operationId": "get__projects",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}": {
+      "get": {
+        "summary": "Project and active schedule",
+        "operationId": "get__projects_projectId",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/schedule-imports": {
+      "post": {
+        "summary": "Queue schedule preview and embedding",
+        "operationId": "post__projects_projectId_schedule-imports",
+        "responses": {
+          "202": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "format",
+                  "baseline_confirmed"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "format": {
+                    "enum": [
+                      "CSV",
+                      "XER",
+                      "XML"
+                    ]
+                  },
+                  "baseline_confirmed": {
+                    "type": "string",
+                    "const": "true"
+                  },
+                  "min_wbs_depth": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/schedule-imports/{importId}": {
+      "get": {
+        "summary": "Import status, preview rows and validation errors",
+        "operationId": "get__projects_projectId_schedule-imports_importId",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/schedule-imports/{importId}/activate": {
+      "post": {
+        "summary": "Activate validated schedule; reviewer role",
+        "operationId": "post__projects_projectId_schedule-imports_importId_activate",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/activities": {
+      "get": {
+        "summary": "List project activities",
+        "operationId": "get__projects_projectId_activities",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/activities/{activityId}": {
+      "get": {
+        "summary": "Get scoped activitie",
+        "operationId": "get__projects_projectId_activities_activityId",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/reports": {
+      "get": {
+        "summary": "List project reports",
+        "operationId": "get__projects_projectId_reports",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ]
+      },
+      "post": {
+        "summary": "Queue idempotent report processing",
+        "operationId": "post__projects_projectId_reports",
+        "responses": {
+          "202": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportSubmission"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/reports/{reportId}": {
+      "get": {
+        "summary": "Get scoped report",
+        "operationId": "get__projects_projectId_reports_reportId",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/proposals": {
+      "get": {
+        "summary": "List project proposals",
+        "operationId": "get__projects_projectId_proposals",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/proposals/{proposalId}": {
+      "get": {
+        "summary": "Get scoped proposal",
+        "operationId": "get__projects_projectId_proposals_proposalId",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Revise and revalidate candidate selection",
+        "operationId": "patch__projects_projectId_proposals_proposalId",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "proposal_version",
+                  "selected_activity_id",
+                  "proposed_changes"
+                ],
+                "properties": {
+                  "proposal_version": {
+                    "type": "integer"
+                  },
+                  "selected_activity_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "proposed_changes": {
+                    "$ref": "#/components/schemas/Event"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/reports/{reportId}/audio": {
+      "get": {
+        "summary": "Authorized original audio replay",
+        "operationId": "get__projects_projectId_reports_reportId_audio",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/reports/{reportId}/clarifications": {
+      "post": {
+        "summary": "Append clarification as new report evidence",
+        "operationId": "post__projects_projectId_reports_reportId_clarifications",
+        "responses": {
+          "202": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportSubmission"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/proposals/{proposalId}/validate": {
+      "post": {
+        "summary": "Preview server-validated actuals without committing",
+        "operationId": "post__projects_projectId_proposals_proposalId_validate",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "selected_activity_id",
+                  "proposed_changes"
+                ],
+                "properties": {
+                  "selected_activity_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "proposed_changes": {
+                    "$ref": "#/components/schemas/Event"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/proposals/{proposalId}/approve": {
+      "post": {
+        "summary": "Reviewer approve",
+        "operationId": "post__projects_projectId_proposals_proposalId_approve",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalVersion"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/proposals/{proposalId}/clarify": {
+      "post": {
+        "summary": "Reviewer clarify",
+        "operationId": "post__projects_projectId_proposals_proposalId_clarify",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewReason"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/proposals/{proposalId}/reject": {
+      "post": {
+        "summary": "Reviewer reject",
+        "operationId": "post__projects_projectId_proposals_proposalId_reject",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewReason"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/variance": {
+      "get": {
+        "summary": "Read variance",
+        "operationId": "get__projects_projectId_variance",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/audit": {
+      "get": {
+        "summary": "Read audit",
+        "operationId": "get__projects_projectId_audit",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/exports": {
+      "get": {
+        "summary": "Read exports",
+        "operationId": "get__projects_projectId_exports",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/projects/{projectId}/closeout": {
+      "post": {
+        "summary": "Approve project closeout into historical records",
+        "operationId": "post__projects_projectId_closeout",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token from /auth/me. Browser Origin must equal APP_ORIGIN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "reason"
+                ],
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/history/comparables": {
+      "get": {
+        "summary": "Filter comparable records; synthetic excluded by default",
+        "operationId": "get__history_comparables",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/health/live": {
+      "get": {
+        "summary": "Health: live",
+        "operationId": "get__health_live",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/health/ready": {
+      "get": {
+        "summary": "Health: ready",
+        "operationId": "get__health_ready",
+        "responses": {
+          "200": {
+            "description": "Successful response; reports/imports use asynchronous processing"
+          },
+          "400": {
+            "description": "Validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sign-in required"
+          },
+          "403": {
+            "description": "Project role or CSRF check failed"
+          },
+          "409": {
+            "description": "Stale version or idempotency conflict"
+          },
+          "422": {
+            "description": "Business-rule validation failed"
+          },
+          "503": {
+            "description": "Dependency unavailable"
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session"
+      }
+    },
+    "schemas": {
+      "Event": {
+        "additionalProperties": false,
+        "properties": {
+          "event_type": {
+            "enum": [
+              "START",
+              "FINISH",
+              "PROGRESS",
+              "BLOCKER",
+              "PLAN",
+              "CORRECTION",
+              "UNKNOWN"
+            ],
+            "title": "Event Type",
+            "type": "string"
+          },
+          "event_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Event Date"
+          },
+          "date_basis": {
+            "default": "EXPLICIT",
+            "title": "Date Basis",
+            "type": "string"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action"
+          },
+          "line_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Line Number"
+          },
+          "asset_tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Tag"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Area"
+          },
+          "discipline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Discipline"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Quantity"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Unit"
+          },
+          "quantity_mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "INCREMENTAL",
+                  "CUMULATIVE",
+                  "COMPONENT_SET"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Quantity Mode"
+          },
+          "component_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Component Ids",
+            "type": "array"
+          },
+          "negated": {
+            "default": false,
+            "title": "Negated",
+            "type": "boolean"
+          },
+          "future_intent": {
+            "default": false,
+            "title": "Future Intent",
+            "type": "boolean"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          },
+          "missing_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Fields",
+            "type": "array"
+          },
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "correction_of_event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Correction Of Event Id"
+          }
+        },
+        "required": [
+          "event_type"
+        ],
+        "title": "Event",
+        "type": "object"
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "fieldErrors",
+          "requestId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "fieldErrors": {
+            "type": "object"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        }
+      },
+      "ProposalVersion": {
+        "type": "object",
+        "required": [
+          "proposal_version"
+        ],
+        "properties": {
+          "proposal_version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ReviewReason": {
+        "type": "object",
+        "required": [
+          "proposal_version",
+          "reason"
+        ],
+        "properties": {
+          "proposal_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 2000
+          }
+        }
+      },
+      "ReportSubmission": {
+        "type": "object",
+        "required": [
+          "source_type",
+          "reporting_date",
+          "captured_at",
+          "idempotency_key"
+        ],
+        "properties": {
+          "source_type": {
+            "enum": [
+              "TEXT",
+              "VOICE",
+              "SPREADSHEET",
+              "SCAN"
+            ]
+          },
+          "original_text": {
+            "type": "string",
+            "maxLength": 50000
+          },
+          "reporting_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "mapping": {
+            "type": "string",
+            "description": "JSON object mapping text to a spreadsheet column header"
+          }
+        }
+      }
+    }
+  }
+}

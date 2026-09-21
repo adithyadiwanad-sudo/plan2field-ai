@@ -1,0 +1,4 @@
+import {test,expect} from '../../frontend/node_modules/@playwright/test/index.mjs';
+import {login,submit} from './helpers.js';
+test.skip(process.env.RUN_REAL_E2E!=='1','Real database/model stack not enabled');
+test('ambiguous report needs reviewer line selection',async({page})=>{test.skip(!process.env.RUN_REAL_E2E,'Requires real semantic stack');await login(page);await submit(page,'Spool erection started in the north area on 12 September 2026.');await page.getByRole('link',{name:'Review queue',exact:true}).click();await expect(page.getByText('Missing: line_number')).toBeVisible({timeout:90000});await page.getByLabel('Line identifier').fill('24');await page.getByRole('button',{name:'Save & revalidate'}).click();await expect(page.getByRole('button',{name:'Approve',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Approve',exact:true}).click();});

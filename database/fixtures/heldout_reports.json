@@ -1,0 +1,38 @@
+[
+  {
+    "text": "Line 42 spool erection commenced in the north area on 13 September 2026.",
+    "event_type": "START",
+    "activity": "ACT-42-SPOOL-01",
+    "provenance": "SYNTHETIC_HELDOUT"
+  },
+  {
+    "text": "Fabrication started on line 24 on 14 September 2026.",
+    "event_type": "START",
+    "activity": "ACT-24-FAB-01",
+    "provenance": "SYNTHETIC_HELDOUT"
+  },
+  {
+    "text": "We will erect line 24 tomorrow.",
+    "event_type": "PLAN",
+    "activity": null,
+    "provenance": "SYNTHETIC_HELDOUT"
+  },
+  {
+    "text": "Line 42 has not started erection.",
+    "event_type": "UNKNOWN",
+    "activity": null,
+    "provenance": "SYNTHETIC_HELDOUT"
+  },
+  {
+    "text": "Line 888 welding started on 14 September 2026.",
+    "event_type": "START",
+    "activity": null,
+    "provenance": "SYNTHETIC_HELDOUT"
+  },
+  {
+    "text": "Spool erection commenced in the north area on 14 September 2026.",
+    "event_type": "START",
+    "activity": null,
+    "provenance": "SYNTHETIC_HELDOUT"
+  }
+]

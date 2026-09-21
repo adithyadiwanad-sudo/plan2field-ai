@@ -1,0 +1,7 @@
+**/node_modules/**
+**/dist/**
+.venv/**
+models/**
+**/pytest-cache-files-*/**
+package-lock.json
+**/package-lock.json

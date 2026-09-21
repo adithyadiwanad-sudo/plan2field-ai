@@ -1,0 +1,13 @@
+{
+  "name": "plan2field-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "test": "npm --prefix backend test && npm --prefix frontend test",
+    "format": "prettier --write \"backend/src/**/*.ts\" \"frontend/src/**/*.{js,jsx,css}\" \"shared/*.json\" \"database/fixtures/*.json\" package.json backend/package.json frontend/package.json"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

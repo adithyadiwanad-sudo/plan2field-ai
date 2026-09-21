@@ -1,0 +1,75 @@
+services:
+  db:
+    image: pgvector/pgvector:0.8.6-pg17-trixie
+    environment:
+      POSTGRES_DB: plan2field
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env}
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./database/roles.sql:/docker-entrypoint-initdb.d/002-roles.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U postgres -d plan2field]
+      interval: 5s
+      retries: 20
+    ports: ["127.0.0.1:5432:5432"]
+  backend:
+    image: plan2field-backend:local
+    build: ./backend
+    environment:
+      PGHOST: db
+      PGDATABASE: plan2field
+      PGUSER: p2f_api
+      PGPASSWORD: ${API_DB_PASSWORD}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8080}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      UPLOAD_DIR: /uploads
+    volumes: ["uploads:/uploads", "./database:/database:ro"]
+    depends_on:
+      db: {condition: service_healthy}
+  ml_worker:
+    image: plan2field-worker:local
+    build: ./ml_worker
+    environment:
+      PGHOST: db
+      PGDATABASE: plan2field
+      PGUSER: p2f_worker
+      PGPASSWORD: ${WORKER_DB_PASSWORD}
+      HF_HUB_OFFLINE: "1"
+      MODEL_CACHE: /models
+      UPLOAD_DIR: /uploads
+    volumes: ["uploads:/uploads", "models:/models", "./database/fixtures:/fixtures:ro"]
+    depends_on:
+      db: {condition: service_healthy}
+  frontend:
+    build: ./frontend
+    ports: ["127.0.0.1:8080:80"]
+    depends_on: [backend]
+  bootstrap:
+    image: plan2field-backend:local
+    profiles: [setup]
+    env_file: .env
+    environment:
+      DB_HOST: db
+    volumes: ["./database:/database:ro"]
+    command: [node, scripts/bootstrap.mjs]
+    depends_on:
+      db: {condition: service_healthy}
+  seed:
+    image: plan2field-worker:local
+    profiles: [setup]
+    env_file: .env
+    environment:
+      DB_HOST: db
+      SEED_OWNER: "true"
+      HF_HUB_OFFLINE: "1"
+      MODEL_CACHE: /models
+      UPLOAD_DIR: /uploads
+    volumes: ["uploads:/uploads", "models:/models", "./database/fixtures:/fixtures:ro"]
+    command: [python, scripts/seed_data.py]
+    depends_on:
+      db: {condition: service_healthy}
+volumes:
+  database:
+  uploads:
+  models:

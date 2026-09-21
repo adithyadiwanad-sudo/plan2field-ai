@@ -1,0 +1,4 @@
+import {test,expect} from '../../frontend/node_modules/@playwright/test/index.mjs';
+import {login,submit} from './helpers.js';
+test.skip(process.env.RUN_REAL_E2E!=='1','Real database/model stack not enabled');
+test('three of ten produces 30 percent after approval',async({page})=>{test.skip(!process.env.RUN_REAL_E2E,'Requires real semantic stack');await login(page);await submit(page,'On line 24, spools S01, S02 and S03 are erected. Three out of ten are complete in total as of 15 September 2026.');await page.getByRole('link',{name:'Review queue',exact:true}).click();await expect(page.getByRole('heading',{name:'progress observation'})).toBeVisible({timeout:90000});await page.getByRole('button',{name:'Approve',exact:true}).click();await page.getByRole('link',{name:'Overview',exact:true}).click();await expect(page.getByRole('row').filter({hasText:'ACT-24-SPOOL-01'})).toContainText('30.0%');});

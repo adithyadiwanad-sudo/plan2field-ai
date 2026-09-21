@@ -1,0 +1,7 @@
+{
+  "clean_start_variance_days": 2,
+  "partial_quantity": 3,
+  "partial_percent": 30,
+  "partial_finish": null,
+  "all_data": "SYNTHETIC DEMO DATA"
+}

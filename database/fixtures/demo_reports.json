@@ -1,0 +1,58 @@
+[
+  {
+    "name": "CLEAN_START",
+    "text": "Line twenty-four spool erection started on 12 September 2026 in the north area.",
+    "event_type": "START",
+    "activity": "ACT-24-SPOOL-01",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "name": "AMBIGUOUS",
+    "text": "Spool erection started in the north area on 12 September 2026.",
+    "event_type": "START",
+    "activity": null,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "name": "PARTIAL",
+    "text": "On line 24, spools S01, S02 and S03 are erected. Three out of ten are complete in total as of 15 September 2026.",
+    "event_type": "PROGRESS",
+    "activity": "ACT-24-SPOOL-01",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "name": "FUTURE",
+    "text": "We will start erecting line 24 tomorrow.",
+    "event_type": "PLAN",
+    "activity": null,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "name": "NEGATION",
+    "text": "Line 24 erection has not started.",
+    "event_type": "UNKNOWN",
+    "activity": null,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "name": "CORRECTION",
+    "text": "Correction: S03 was reported in error; only S01 and S02 are erected.",
+    "event_type": "CORRECTION",
+    "activity": null,
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "name": "WRONG_OPERATION",
+    "text": "Hydrotest completed on line 24 on 15 September 2026.",
+    "event_type": "FINISH",
+    "activity": "ACT-24-TEST-01",
+    "provenance": "SYNTHETIC"
+  },
+  {
+    "name": "NO_MATCH",
+    "text": "Line 999 insulation started on 12 September 2026.",
+    "event_type": "START",
+    "activity": null,
+    "provenance": "SYNTHETIC"
+  }
+]

@@ -1,0 +1,4 @@
+import pg from 'pg';
+if(process.env.LOCAL_DEMO!=='true')throw new Error('Bootstrap requires LOCAL_DEMO=true. Production role provisioning is separate.');
+const client=new pg.Client({host:process.env.DB_HOST||'db',database:'plan2field',user:'postgres',password:process.env.POSTGRES_PASSWORD});await client.connect();
+try{for(const [role,password]of [['p2f_api',process.env.API_DB_PASSWORD],['p2f_worker',process.env.WORKER_DB_PASSWORD]]){if(!password||password.length<12)throw new Error('Set runtime database passwords to at least 12 characters.');const q=await client.query('SELECT format(\'ALTER ROLE %I PASSWORD %L\',$1::text,$2::text) AS sql',[role,password]);await client.query(q.rows[0].sql);}console.log('Runtime role credentials configured. Protected tables remain owned by the migration role.');}finally{await client.end();}
