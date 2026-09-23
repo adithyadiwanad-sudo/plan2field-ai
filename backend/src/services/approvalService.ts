@@ -133,10 +133,12 @@ export async function approve(
         after.physical_percent_complete,
       ],
     );
-    await c.query(
-      "UPDATE staged_proposals SET lifecycle_status='APPROVED',reviewed_by=$2,reviewed_at=now(),proposal_version=proposal_version+1 WHERE id=$1",
-      [id, actor],
-    );
+    const approvedProposal = (
+      await c.query(
+        "UPDATE staged_proposals SET lifecycle_status='APPROVED',reviewed_by=$2,reviewed_at=now(),proposal_version=proposal_version+1 WHERE id=$1 RETURNING *",
+        [id, actor],
+      )
+    ).rows[0];
     await c.query(
       "INSERT INTO proposal_revisions(proposal_id,version,snapshot,actor_id) VALUES($1,$2,$3,$4)",
       [id, p.proposal_version, JSON.stringify(p), actor],
@@ -159,6 +161,15 @@ export async function approve(
           source_event: accepted.id,
           approval: { actor, at: accepted.committed_at },
           idempotency_reference: accepted.id,
+          approval_status: "APPROVED",
+          evidence: {
+            latitude: approvedProposal.latitude,
+            longitude: approvedProposal.longitude,
+            geofence_status: approvedProposal.geofence_status,
+            evidence_urls: approvedProposal.evidence_urls,
+          },
+          delay_reason: approvedProposal.delay_reason,
+          affected_successor_ids: approvedProposal.affected_successor_ids,
         }),
         accepted.id,
       ],

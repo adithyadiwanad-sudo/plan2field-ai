@@ -7,6 +7,7 @@ import { auth, hash } from "../middleware/auth.js";
 import { ApiError } from "../middleware/errors.js";
 import { config, isAllowedOrigin } from "../config.js";
 import { throttled } from "../middleware/requestId.js";
+import { userProfile } from "../services/userProfile.js";
 export const authRouter = Router();
 authRouter.post(
   "/login",
@@ -49,7 +50,7 @@ authRouter.post(
         maxAge: 43200000,
         path: "/",
       })
-      .json({ id: u.id, email: u.email, name: u.name, csrf_token: csrf });
+      .json({ ...await userProfile(u.id), csrf_token: csrf });
   },
 );
 authRouter.get("/me", auth, (_req, res) => res.json(res.locals.user));

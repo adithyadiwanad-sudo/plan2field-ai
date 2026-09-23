@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Send, FileText, Mic } from "lucide-react";
 import VoiceRecorder from "./VoiceRecorder";
 import ErrorState from "./ErrorState";
+import { captureLocation } from "../lib/geolocation";
 export default function ReportComposer({ project, queue }) {
   const [type, setType] = useState("TEXT"),
     [discipline, setDiscipline] = useState(""),
     [text, setText] = useState(""),
     [file, setFile] = useState(null),
+    [photos, setPhotos] = useState([]),
+    [delayReason, setDelayReason] = useState(""),
     [date, setDate] = useState(project?.reporting_date || ""),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(null),
@@ -16,6 +19,8 @@ export default function ReportComposer({ project, queue }) {
     setBusy(true);
     setError(null);
     try {
+      setMessage("Capturing current GPS location…");
+      const location = await captureLocation();
       await queue.enqueue(project.id, {
         source_type: type,
         ...(discipline ? { discipline } : {}),
@@ -24,6 +29,9 @@ export default function ReportComposer({ project, queue }) {
         captured_at: new Date().toISOString(),
         idempotency_key: crypto.randomUUID(),
         ...(file ? { file } : {}),
+        ...location,
+        ...(photos.length ? { photos } : {}),
+        ...(delayReason ? { delay_reason: delayReason } : {}),
         ...(type === "SPREADSHEET"
           ? {
               mapping: JSON.stringify({
@@ -35,8 +43,15 @@ export default function ReportComposer({ project, queue }) {
       });
       setText("");
       setFile(null);
+      setPhotos([]);
+      setDelayReason("");
+      e.target.reset();
       setMessage(
-        "Report saved. Online submissions are queued for processing; offline reports stay on this device until acknowledged.",
+        "Report saved. " +
+          (location.latitude == null
+            ? "GPS unavailable or permission denied; geofence status is UNKNOWN. "
+            : "GPS captured; geofence is checked against configured site coordinates. ") +
+          "Offline evidence stays on this device until acknowledged.",
       );
     } catch (e) {
       setError(e);
@@ -127,6 +142,59 @@ export default function ReportComposer({ project, queue }) {
           />
         </label>
       )}
+      <label>
+        Site evidence photos (optional, up to 3 PNG/JPEG files, 5 MB each)
+        <input
+          aria-label="Site evidence photos"
+          type="file"
+          accept="image/png,image/jpeg"
+          multiple
+          onChange={(e) => {
+            const selected = Array.from(e.target.files || []);
+            if (
+              selected.length > 3 ||
+              selected.some((f) => f.size > 5 * 1024 * 1024)
+            ) {
+              setError(
+                new Error(
+                  "Attach at most three photos, each no larger than 5 MB.",
+                ),
+              );
+              e.target.value = "";
+              setPhotos([]);
+              return;
+            }
+            setPhotos(selected);
+            setError(null);
+          }}
+        />
+      </label>
+      <p className="muted">
+        {photos.length} photo(s) attached. GPS is requested when submitting;
+        denied or unavailable GPS does not block your report.
+      </p>
+      <label>
+        Delay reason (optional)
+        <select
+          aria-label="Delay reason"
+          value={delayReason}
+          onChange={(e) => setDelayReason(e.target.value)}
+        >
+          <option value="">No delay reported</option>
+          {[
+            "MATERIAL_SHORTAGE",
+            "MANPOWER_SHORTAGE",
+            "EQUIPMENT_FAILURE",
+            "WEATHER_ACCESS",
+            "DESIGN_REWORK",
+            "OTHER",
+          ].map((r) => (
+            <option key={r} value={r}>
+              {r.replaceAll("_", " ")}
+            </option>
+          ))}
+        </select>
+      </label>
       <div className="notice">
         Reports become staged proposals. A reviewer must approve them before
         actuals change.

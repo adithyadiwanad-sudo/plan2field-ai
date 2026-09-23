@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { setCsrf } from "./api/client";
 import { restoreDemoSession } from "./api/auth";
+import LoginPage from "./pages/LoginPage";
 import AppShell from "./components/AppShell";
 import ProjectDashboard from "./pages/ProjectDashboard";
 import SubmitReport from "./pages/SubmitReport";
@@ -31,10 +32,9 @@ function Home() {
 }
 export default function App() {
   const [user, setUser] = useState(null),
-    [loading, setLoading] = useState(true),
-    [authError, setAuthError] = useState(null),
-    [attempt, setAttempt] = useState(0);
+    [loading, setLoading] = useState(true);
   const client = useQueryClient();
+  const location = useLocation();
   function login(u) {
     setCsrf(u.csrf_token);
     setUser(u);
@@ -46,7 +46,7 @@ export default function App() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    setAuthError(null);
+    if (window.location.pathname === "/login") { setLoading(false); return; }
     restoreDemoSession()
       .then((u) => {
         if (active) login(u);
@@ -64,7 +64,7 @@ export default function App() {
             sessionStorage.removeItem("p2f-last-user");
           }
         }
-        setAuthError(error);
+
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -72,24 +72,10 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [attempt]);
+  }, []);
+  if (location.pathname === "/login") return <LoginPage onLogin={(u) => { client.clear(); login(u); }} />;
   if (loading) return <div className="empty">Opening workspace…</div>;
-  if (!user)
-    return (
-      <div className="empty">
-        <h1>Demo workspace</h1>
-        {authError ? (
-          <ErrorState
-            error={authError}
-            retry={() => setAttempt((a) => a + 1)}
-          />
-        ) : (
-          <button onClick={() => setAttempt((a) => a + 1)}>
-            Open demo workspace
-          </button>
-        )}
-      </div>
-    );
+  if (!user) return <Navigate to="/login" replace />;
   return (
     <Routes>
       <Route path="/" element={<Home />} />

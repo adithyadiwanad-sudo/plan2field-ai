@@ -6,6 +6,8 @@ SIH26122 · Oil India Limited challenge · independent prototype. All included p
 
 ## What is implemented
 
+The [field evidence update](docs/field-evidence.md) adds GPS geofencing, authenticated site photos, delay reasons, immediate-successor warnings and approved CSV/XER-style JSON exports.
+
 The [enterprise evidence update](docs/enterprise-evidence.md) documents six-discipline ingestion, explicit unmatched/low-confidence review, traceability, Institutional Memory, dashboard filters and the versioned P6/SAP integration export contract.
 
 - PostgreSQL/pgvector schedule versions, protected baselines, asynchronous reports/jobs, review proposals, immutable accepted events and audit.

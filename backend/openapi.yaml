@@ -1664,7 +1664,7 @@
     },
     "/api/projects/{projectId}/exports": {
       "get": {
-        "summary": "Enterprise Export: approved actual event snapshots as integration JSON or flat CSV",
+        "summary": "Download approved updates as CSV, integration JSON or XER-style JSON",
         "operationId": "get__projects_projectId_exports",
         "responses": {
           "200": {
@@ -1928,6 +1928,181 @@
           }
         },
         "security": []
+      }
+    },
+    "/api/projects/{projectId}/reports/{reportId}/evidence/{evidenceId}": {
+      "get": {
+        "summary": "Read an authenticated, project-scoped evidence image",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "evidenceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PNG or JPEG image bytes"
+          },
+          "401": {
+            "description": "Session required"
+          },
+          "403": {
+            "description": "Project membership required"
+          },
+          "404": {
+            "description": "Evidence not found"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/activities/{activityId}/successors": {
+      "get": {
+        "summary": "Immediate same-project, same-schedule successors from imported dependency records",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "activityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Immediate dependency warnings only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scope": {
+                      "type": "string",
+                      "enum": [
+                        "IMMEDIATE_DEPENDENCIES_ONLY"
+                      ]
+                    },
+                    "successors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "activity_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "external_activity_id": {
+                            "type": "string"
+                          },
+                          "relationship_type": {
+                            "type": "string"
+                          },
+                          "lag": {},
+                          "description": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/geofence": {
+      "patch": {
+        "summary": "Reviewer/admin configures a site geofence; changes are audited",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "latitude",
+                  "longitude",
+                  "radius_m"
+                ],
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "radius_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 100000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Site geofence configured"
+          },
+          "400": {
+            "description": "Invalid coordinates/radius"
+          },
+          "403": {
+            "description": "Reviewer access and valid CSRF required"
+          }
+        }
       }
     }
   },
@@ -2243,6 +2418,41 @@
               "HSSE"
             ],
             "description": "Optional hint; explicit per-event discipline takes priority."
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "gps_accuracy_m": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 999999
+          },
+          "delay_reason": {
+            "type": "string",
+            "enum": [
+              "MATERIAL_SHORTAGE",
+              "MANPOWER_SHORTAGE",
+              "EQUIPMENT_FAILURE",
+              "WEATHER_ACCESS",
+              "DESIGN_REWORK",
+              "OTHER"
+            ]
+          },
+          "photos": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "format": "binary"
+            },
+            "description": "Additional site evidence PNG/JPEG photos, at most 5 MB each. Existing file field remains the voice/spreadsheet/scan source."
           }
         }
       }

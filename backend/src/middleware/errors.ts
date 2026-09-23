@@ -13,7 +13,12 @@ export const errors: ErrorRequestHandler = (err, req, res, _next) => {
   const validation = err instanceof ZodError;
   const status = validation
     ? 400
-    : err.status || (err.code === "LIMIT_FILE_SIZE" ? 413 : 500);
+    : err.status ||
+      (err.code === "LIMIT_FILE_SIZE"
+        ? 413
+        : err.name === "MulterError"
+          ? 400
+          : 500);
   if (status >= 500)
     console.error(
       JSON.stringify({ requestId: res.locals.requestId, error: err.message }),

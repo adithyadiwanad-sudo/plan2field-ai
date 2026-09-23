@@ -16,6 +16,7 @@ export const projectAccess: RequestHandler = async (req, res, next) => {
     );
   res.locals.projectId = id;
   res.locals.role = rows[0].role;
+  res.locals.user.role = rows[0].role;
   next();
 };
 export function reviewer(res: any) {

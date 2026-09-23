@@ -7,6 +7,7 @@ import { api, apiUrl } from "../api/client";
 import CandidateComparison from "./CandidateComparison";
 import ProposalDiff from "./ProposalDiff";
 import ErrorState from "./ErrorState";
+import EvidenceCard from "./EvidenceCard";
 export default function ReviewerQueue() {
   const { projectId } = useParams(),
     client = useQueryClient();
@@ -25,6 +26,18 @@ export default function ReviewerQueue() {
           <span className="eyebrow">HUMAN-IN-THE-LOOP</span>
           <h1>Review queue</h1>
           <p>Turn field evidence into trusted project actuals.</p>
+          <a
+            className="secondary"
+            href={apiUrl(`/projects/${projectId}/exports?format=csv`)}
+          >
+            Export Approved Updates (.CSV)
+          </a>{" "}
+          <a
+            className="secondary"
+            href={apiUrl(`/projects/${projectId}/exports?format=xer-json`)}
+          >
+            Export Approved Updates (.XER JSON)
+          </a>
         </div>
         <select
           aria-label="Filter review status"
@@ -71,6 +84,7 @@ export default function ReviewerQueue() {
                   {row.proposed_changes.event_type} ·{" "}
                   {row.proposed_changes.event_date || row.reporting_date}
                 </b>
+                <EvidenceCard proposal={row} compact />
                 <p>
                   {row.source_evidence?.text ||
                     row.original_text ||
@@ -111,6 +125,25 @@ function ReviewDetail({ p, projectId, onChange }) {
     queryFn: () => api(`/projects/${projectId}/activities/${candidate}`),
     enabled: !!candidate,
   });
+  const successors = useQuery({
+    queryKey: ["successors", projectId, candidate],
+    queryFn: () =>
+      api(`/projects/${projectId}/activities/${candidate}/successors`),
+    enabled: !!candidate,
+  });
+  const delayed =
+    !!p.delay_reason ||
+    Number(p.proposed_variance?.variance_days) > 0 ||
+    Number(activity.data?.start_variance_days) > 0 ||
+    Number(activity.data?.finish_variance_days) > 0 ||
+    (event.event_type === "START" &&
+      event.event_date &&
+      activity.data?.baseline_start &&
+      event.event_date > activity.data.baseline_start) ||
+    (event.event_type === "FINISH" &&
+      event.event_date &&
+      activity.data?.baseline_finish &&
+      event.event_date > activity.data.baseline_finish);
   function edit(key, value) {
     setEvent({ ...event, [key]: value });
     setDirty(true);
@@ -218,6 +251,37 @@ function ReviewDetail({ p, projectId, onChange }) {
         Extraction: deterministic-v1 · Proposal v{p.proposal_version} · Schedule{" "}
         {p.schedule_version_id.slice(0, 8)}
       </p>
+      <EvidenceCard proposal={p} />
+      {delayed && (
+        <div className="notice delay-warning" role="status">
+          <strong>
+            ⚠️{" "}
+            {p.delay_reason?.replaceAll("_", " ") || "Positive date variance"}
+          </strong>
+          {successors.isPending && candidate ? (
+            <p>Checking direct successors…</p>
+          ) : successors.error ? (
+            <ErrorState error={successors.error} />
+          ) : successors.data?.successors?.length ? (
+            successors.data.successors.map((s) => (
+              <p key={s.activity_id}>
+                Delay impacts successor activity <b>{s.external_activity_id}</b>{" "}
+                · {s.relationship_type} · {s.description}
+              </p>
+            ))
+          ) : (
+            <p>
+              {candidate
+                ? "No direct successors in the imported schedule."
+                : "Select a compatible activity to determine successor impact."}
+            </p>
+          )}
+          <small>
+            Immediate dependency warning only; no CPM or downstream date
+            recalculation.
+          </small>
+        </div>
+      )}
       <CandidateComparison
         candidates={p.candidate_matches}
         value={candidate}

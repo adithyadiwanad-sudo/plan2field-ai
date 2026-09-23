@@ -76,11 +76,18 @@ app.get(root + "/exports", async (req, res) => {
   const result = await exportsForProject(
     pool,
     res.locals.projectId,
-    req.query.format === "csv" ? "csv" : undefined,
+    z.enum(["csv", "json", "xer-json"]).default("json").parse(req.query.format),
   );
   if (req.query.format === "csv") {
     res.type("text/csv").attachment("enterprise-proposals.csv").send(result);
-  } else res.attachment("enterprise-proposals.json").json(result);
+  } else
+    res
+      .attachment(
+        req.query.format === "xer-json"
+          ? "approved-updates.xer.json"
+          : "enterprise-proposals.json",
+      )
+      .json(result);
 });
 app.post(root + "/closeout", async (req, res) => {
   reviewer(res);

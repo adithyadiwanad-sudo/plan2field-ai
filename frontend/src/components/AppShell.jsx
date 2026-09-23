@@ -96,6 +96,7 @@ export default function AppShell({ user, onLogout }) {
           <p>Every accepted update has a reviewable source and audit trail.</p>
           <span className="local-dot" /> Local inference
         </div>
+        <NavLink to="/login" className="p-3 text-sm font-semibold">Switch demo role</NavLink>
         <div className="user">
           <span className="avatar">{user.name?.slice(0, 2).toUpperCase()}</span>
           <span>

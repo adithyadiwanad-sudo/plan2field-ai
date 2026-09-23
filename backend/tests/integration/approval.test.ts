@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import {randomUUID,scryptSync} from 'node:crypto';
 test('real PostgreSQL approval and HTTP integration',{skip:!process.env.TEST_DATABASE_URL},async t=>{
- const c=new pg.Client({connectionString:process.env.TEST_DATABASE_URL});await c.connect();let apiPool:any,server:any;
+ const c=new pg.Client({connectionString:process.env.TEST_DATABASE_URL});await c.connect();let apiPool:any,server:any,evidenceReport:any;
  try{
   assert.match((await c.query('SELECT current_database() AS name')).rows[0].name,/^p2f_test_/);
   process.env.DATABASE_URL=process.env.TEST_API_DATABASE_URL;process.env.APP_ORIGIN='http://localhost:8080';assert.ok(process.env.DATABASE_URL);
@@ -39,6 +39,54 @@ test('real PostgreSQL approval and HTTP integration',{skip:!process.env.TEST_DAT
    assert.equal(data.records.length,4);assert.ok(data.records.every((r:any)=>r.ApprovedBy===user && r.ActivityId==='A' && r.ReporterRole==='REVIEWER'));
    const csv=await exportsForProject(pool,project,'csv');assert.match(csv,/ActualStartDate,ActualFinishDate,PhysicalPercentComplete/);
   });
-  await t.test('HTTP project isolation and CSRF',async()=>{const {app}=await import('../../src/app.js');server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));const base='http://127.0.0.1:'+server.address().port;const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json',Origin:'http://localhost:8080'},body:JSON.stringify({email:'test@example.test',password:'TestPassword123!'})});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie')!.split(';')[0];assert.equal((await fetch(base+`/api/projects/${other}/activities`,{headers:{Cookie:cookie}})).status,403);assert.equal((await fetch(base+`/api/projects/${project}/reports`,{method:'POST',headers:{Cookie:cookie,'Content-Type':'application/json'},body:JSON.stringify(data)})).status,403);});
+  await t.test('GPS/photos, direct successors and approved evidence reach the outbox',async()=>{
+   await c.query('UPDATE projects SET site_latitude=0,site_longitude=0,geofence_radius_m=1000 WHERE id=$1',[project]);
+   const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aE6kAAAAASUVORK5CYII=','base64');
+   const photo={buffer:png,originalname:'site.png',mimetype:'image/png'} as any;
+   const d={...data,idempotency_key:randomUUID(),latitude:0,longitude:0,gps_accuracy_m:5,delay_reason:'MATERIAL_SHORTAGE'};
+   evidenceReport=await submitReport(project,user,d,undefined,[photo]);
+   assert.equal(evidenceReport.geofence_status,'VERIFIED');assert.equal(evidenceReport.evidence_urls.length,1);
+   assert.equal((await submitReport(project,user,d,undefined,[photo])).id,evidenceReport.id);
+   await assert.rejects(()=>submitReport(project,user,{...d,longitude:1},undefined,[photo]),(e:any)=>e.status===409);
+   const successors=(await c.query("INSERT INTO schedule_activities(project_id,schedule_version_id,external_activity_id,description,wbs_path,activity_type,planned_total_quantity,quantity_unit,measurement_method) VALUES($1,$2,'PIP-0235','Direct successor','TEST','ERECTION',1,'unit','QUANTITY'),($1,$2,'PIP-0236','Grandchild','TEST','ERECTION',1,'unit','QUANTITY') RETURNING id,external_activity_id",[project,version])).rows;
+   await c.query("INSERT INTO activity_relationships(project_id,schedule_version_id,predecessor,successor,relationship_type) VALUES($1,$2,$3,$4,'FS'),($1,$2,$4,$5,'FS')",[project,version,activity,successors[0].id,successors[1].id]);
+   const event=(await c.query("INSERT INTO report_events(site_report_id,project_id,event_index,event_type,extracted_fields,evidence,extraction_version) VALUES($1,$2,0,'START',$3,'{}','evidence-test') RETURNING id",[evidenceReport.id,project,JSON.stringify(start)])).rows[0];
+   const rowVersion=(await c.query('SELECT row_version FROM schedule_activities WHERE id=$1',[activity])).rows[0].row_version;
+   const p=(await c.query("INSERT INTO staged_proposals(report_event_id,project_id,schedule_version_id,selected_activity_id,candidate_matches,proposed_changes,expected_activity_row_version,model_version,routing_status,explanation) VALUES($1,$2,$3,$4,'[]',$5,$6,'test','REVIEW_NEEDED','evidence test') RETURNING *",[event.id,project,version,activity,JSON.stringify(start),rowVersion])).rows[0];
+   assert.equal(p.geofence_status,'VERIFIED');assert.deepEqual(p.affected_successor_ids,['PIP-0235']);
+   const changed=(await c.query('UPDATE staged_proposals SET selected_activity_id=$2 WHERE id=$1 RETURNING affected_successor_ids',[p.id,successors[0].id])).rows[0];
+   assert.deepEqual(changed.affected_successor_ids,['PIP-0236']);
+   await c.query('UPDATE staged_proposals SET selected_activity_id=$2 WHERE id=$1',[p.id,activity]);
+   const accepted=await approve(project,p.id,1,user,'evidence-approval');
+   const outbox=(await c.query('SELECT payload,status FROM export_outbox WHERE progress_event_id=$1',[accepted.id])).rows[0];
+   assert.equal(outbox.payload.approval_status,'APPROVED');assert.equal(outbox.status,'UNCONFIRMED');
+   assert.deepEqual(outbox.payload.affected_successor_ids,['PIP-0235']);assert.equal(outbox.payload.evidence.evidence_urls.length,1);
+   const {exportsForProject}=await import('../../src/services/exportService.js');
+   const xer=await exportsForProject(pool,project,'xer-json');assert.ok(xer.TASK.some((r:any)=>r.IdempotencyKey===accepted.id && r.delay_reason==='MATERIAL_SHORTAGE' && r.affected_successor_ids[0]==='PIP-0235'));
+   const {directSuccessors}=await import('../../src/services/evidenceService.js');
+   assert.equal((await directSuccessors(pool,other,version,activity)).length,0);
+  });
+  await t.test('HTTP project isolation and CSRF',async()=>{const {app}=await import('../../src/app.js');server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));const base='http://127.0.0.1:'+server.address().port;const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json',Origin:'http://localhost:8080'},body:JSON.stringify({email:'test@example.test',password:'TestPassword123!'})});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie')!.split(';')[0];const evidencePath='/api'+evidenceReport.evidence_urls[0].url;
+   assert.equal((await fetch(base+evidencePath)).status,401);
+   const image=await fetch(base+evidencePath,{headers:{Cookie:cookie}});assert.equal(image.status,200);assert.match(image.headers.get('content-type')!,/image\/png/);
+   assert.equal((await fetch(base+evidencePath.replace(project,other),{headers:{Cookie:cookie}})).status,403);
+   assert.equal((await fetch(base+`/api/projects/${other}/activities`,{headers:{Cookie:cookie}})).status,403);assert.equal((await fetch(base+`/api/projects/${project}/reports`,{method:'POST',headers:{Cookie:cookie,'Content-Type':'application/json'},body:JSON.stringify(data)})).status,403);});
+  await t.test('demo identities preserve passwords, role guards, sessions and report lineage',async()=>{
+   const base='http://127.0.0.1:'+server.address().port;
+   for(const [email,role] of [['engineer@plan2field.ai','ENGINEER'],['planner@plan2field.ai','REVIEWER']]){
+    const id=(await c.query("INSERT INTO users(email,password_hash,name,discipline) VALUES($1,$2,$3,'PIPING') RETURNING id",[email,'demo-salt:'+scryptSync('ChangeThisDemoPassword123!','demo-salt',64).toString('hex'),role])).rows[0].id;
+    await c.query('INSERT INTO project_memberships VALUES($1,$2,$3)',[project,id,role]);
+    const request=(password:string)=>fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json',Origin:'http://localhost:8080'},body:JSON.stringify({email,password})});
+    assert.equal((await request('wrong')).status,401);
+    const response=await request('ChangeThisDemoPassword123!');assert.equal(response.status,200);
+    const profile:any=await response.json();assert.equal(profile.userId,id);assert.equal(profile.discipline,'PIPING');assert.equal(profile.memberships[0].role,role);
+    const headers={Cookie:response.headers.get('set-cookie')!.split(';')[0],Origin:'http://localhost:8080','X-CSRF-Token':profile.csrf_token,'Content-Type':'application/json'};
+    const me:any=await (await fetch(base+'/api/auth/me',{headers})).json();assert.equal(me.id,id);
+    assert.equal((await fetch(base+`/api/projects/${project}/geofence`,{method:'PATCH',headers,body:JSON.stringify({latitude:0,longitude:0,radius_m:1000})})).status,role==='ENGINEER'?403:200);
+    assert.equal((await fetch(base+`/api/projects/${other}/activities`,{headers})).status,403);
+    const reportResponse=await fetch(base+`/api/projects/${project}/reports`,{method:'POST',headers,body:JSON.stringify({...data,idempotency_key:randomUUID()})});assert.equal(reportResponse.status,202);
+    const stored=(await c.query('SELECT submitted_by,reporter_role FROM site_reports WHERE submitted_by=$1',[id])).rows[0];assert.equal(stored.submitted_by,id);assert.equal(stored.reporter_role,role);
+   }
+  });
  }finally{if(server)await new Promise<void>(r=>server.close(()=>r()));if(apiPool)await apiPool.end();await c.end();}
 });

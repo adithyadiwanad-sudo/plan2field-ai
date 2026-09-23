@@ -15,6 +15,8 @@ def main():
         user=conn.execute('INSERT INTO users(email,password_hash,name) VALUES(%s,%s,%s) ON CONFLICT(email) DO UPDATE SET email=EXCLUDED.email RETURNING id',(email,salt+':'+digest,'Demo Reviewer')).fetchone()['id']
         project=conn.execute("INSERT INTO projects(code,name,description,reporting_date,provenance) VALUES('OIL-DEMO-01','Oil & Gas Piping Execution Demo','SYNTHETIC DEMO DATA — illustrative, not Oil India records','2026-09-15','SYNTHETIC') ON CONFLICT(code) DO UPDATE SET code=EXCLUDED.code RETURNING *").fetchone()
         conn.execute("INSERT INTO project_memberships(project_id,user_id,role) VALUES(%s,%s,'ADMIN') ON CONFLICT DO NOTHING",(project['id'],user))
+        from seed_demo_accounts import seed_demo_accounts
+        seed_demo_accounts(conn, project['id'])
         data=(FIXTURES/'demo_schedule.csv').read_bytes()
         version=conn.execute("INSERT INTO schedule_versions(project_id,version_number,source_format,source_filename,source_hash,imported_by) VALUES(%s,1,'CSV','demo_schedule.csv',%s,%s) ON CONFLICT(project_id,version_number) DO UPDATE SET version_number=EXCLUDED.version_number RETURNING *",(project['id'],hashlib.sha256(data).hexdigest(),user)).fetchone()
         # Deliberately unassigned second project tests access isolation.

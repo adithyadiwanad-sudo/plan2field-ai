@@ -9,6 +9,8 @@ services:
       - ./database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
       - ./database/roles.sql:/docker-entrypoint-initdb.d/002-roles.sql:ro
       - ./database/migrations/002_enterprise_evidence.sql:/docker-entrypoint-initdb.d/003-enterprise.sql:ro
+      - ./database/migrations/003_field_evidence.sql:/docker-entrypoint-initdb.d/004-field-evidence.sql:ro
+      - ./database/migrations/004_demo_profiles.sql:/docker-entrypoint-initdb.d/005-demo-profiles.sql:ro
     healthcheck:
       test: [CMD-SHELL, pg_isready -U postgres -d plan2field]
       interval: 5s

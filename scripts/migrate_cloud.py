@@ -8,4 +8,6 @@ load_environment()
 import psycopg
 with psycopg.connect(os.environ['DATABASE_URL'],connect_timeout=20) as conn:
     conn.execute((root/'database/migrations/002_enterprise_evidence.sql').read_text(encoding='utf-8'))
+    conn.execute((root/'database/migrations/003_field_evidence.sql').read_text(encoding='utf-8'))
+    conn.execute((root/'database/migrations/004_demo_profiles.sql').read_text(encoding='utf-8'))
     print('Enterprise evidence migration applied; existing baselines and actuals preserved.')

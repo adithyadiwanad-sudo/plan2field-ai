@@ -1238,3 +1238,62 @@ pre {
     padding: 6px 10px;
   }
 }
+
+.evidence-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+  align-items: center;
+}
+.evidence-card > p,
+.evidence-card > small,
+.evidence-photos {
+  flex-basis: 100%;
+}
+.trust-badge {
+  font-size: 11px;
+  background: #eef1f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+}
+.trust-badge.verified {
+  background: #def4e3;
+  color: #205832;
+}
+.trust-badge.out_of_bounds {
+  background: #ffe2d6;
+  color: #9b331d;
+}
+.trust-badge.unknown {
+  background: #fff2cf;
+  color: #6f571a;
+}
+.evidence-photos {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.evidence-photos figure {
+  margin: 0;
+  max-width: 180px;
+}
+.evidence-photos img {
+  width: 160px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.evidence-photos figcaption {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.delay-warning {
+  border-left: 4px solid #be741b;
+}
+
+/* Allow the demo login grid to shrink on narrow judging devices. */
+.login > section { min-width: 0; }
+.login-form form { min-width: 0; width: 100%; max-width: 370px; }
+.login-form button { white-space: normal; }
