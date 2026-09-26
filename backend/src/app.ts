@@ -20,6 +20,7 @@ import { pool } from "./db/pool.js";
 import { closeout } from "./services/historyService.js";
 import { connectorStatus } from "./adapters/scheduleExport.js";
 import { exportsForProject } from "./services/exportService.js";
+import { chatRouter } from "./routes/chat.js";
 export const app = express();
 app.use(
   requestId,
@@ -33,6 +34,7 @@ app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectsRouter);
 app.use("/api/history", historyRouter);
+app.use("/api/chat", auth, chatRouter);
 const root = "/api/projects/:projectId";
 app.use(root, auth, projectAccess);
 app.use(root + "/activities", activitiesRouter);

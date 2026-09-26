@@ -1,7 +1,7 @@
 let csrf = "";
 export const BASE_URL = (
   import.meta.env?.VITE_API_BASE_URL ||
-  "https://plan2field-backend.onrender.com/api"
+  "/api"
 ).replace(/\/+$/, "");
 export function apiUrl(path) {
   return BASE_URL + "/" + path.replace(/^\/+/, "");
