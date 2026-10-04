@@ -1,7 +1,7 @@
 
 <div align="center">
 
-# 🏗️ Plan2Field AI
+#  Plan2Field AI
 ### Intelligent Data Capture & Schedule-Linking Layer for Real-Time Infrastructure Progress Tracking
 
 [![PS ID SIH26122](https://img.shields.io/badge/PS_ID-SIH26122-blue?style=for-the-badge)](https://plan2field-ai.vercel.app)
@@ -19,7 +19,7 @@
 
 ---
 
-## 📌 Executive Summary & Problem Context
+##  Executive Summary & Problem Context
 
 Infrastructure megaprojects lose millions due to **delayed progress tracking** and **schedule inflation**. Field engineers record daily activities using informal language, voice notes, or physical site logs, while planners manage rigid Work Breakdown Structure (WBS) baselines in **Oracle Primavera P6** or **Microsoft Project**. Manual reconciliation takes days, causing schedule drift and uncoordinated field execution.
 
@@ -54,19 +54,19 @@ Infrastructure megaprojects lose millions due to **delayed progress tracking** a
 
 ---
 
-## 🚀 Key Technical Innovations
+##  Key Technical Innovations
 
-* **🛡️ Zero Baseline Corruption**: Read-only baseline protection ensures no AI update directly overwrites master project schedules. All updates pass through a staged `.CSV` / `.XER` delta pipeline.
-* **⚡ 2-Tier Human-in-the-Loop Gate**:
+* ** Zero Baseline Corruption**: Read-only baseline protection ensures no AI update directly overwrites master project schedules. All updates pass through a staged `.CSV` / `.XER` delta pipeline.
+* ** 2-Tier Human-in-the-Loop Gate**:
   * **Auto-Staged Queue ($\ge 80\%$ Confidence)**: Fast-tracks high-confidence matches into the Primavera P6 outbox.
   * **Planner Review Queue ($< 80\%$ Confidence)**: Routes low-confidence or ambiguous updates for one-click manual validation.
-* **🔄 Micro-to-Macro Granularity Aggregation**: Maps individual micro-level field events (e.g., single spool erections or cable laying) to macro-level schedule tasks using pre-approved weighting metrics.
-* **⚠️ Unplanned Activity Detection**: Captures emergency or non-standard tasks on site, logging them into an "Unplanned Queue" rather than dropping site data.
-* **📚 Academic Grounding**: Architectural design grounded in 2026 neuro-symbolic AI research from **IIT Bombay** (*Nanduri & Delhi, 2026*) for schedule enrichment.
+* ** Micro-to-Macro Granularity Aggregation**: Maps individual micro-level field events (e.g., single spool erections or cable laying) to macro-level schedule tasks using pre-approved weighting metrics.
+* ** Unplanned Activity Detection**: Captures emergency or non-standard tasks on site, logging them into an "Unplanned Queue" rather than dropping site data.
+* ** Academic Grounding**: Architectural design grounded in 2026 neuro-symbolic AI research from **IIT Bombay** (*Nanduri & Delhi, 2026*) for schedule enrichment.
 
 ---
 
-## 📊 Feature Comparison Matrix
+##  Feature Comparison Matrix
 
 | Capability / Feature | Manual Site Reporting | Legacy ERP Systems | Plan2Field AI |
 | :--- | :---: | :---: | :---: |
@@ -79,7 +79,7 @@ Infrastructure megaprojects lose millions due to **delayed progress tracking** a
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+##  Tech Stack & Architecture
 
 ```text
 ├── Frontend              : Single-Page React (Vite, Tailwind CSS v4, Lucide Icons)
@@ -93,7 +93,7 @@ Infrastructure megaprojects lose millions due to **delayed progress tracking** a
 
 ---
 
-## ⚡ Quickstart & Local Setup
+##  Quickstart & Local Setup
 
 ### Prerequisites
 
@@ -132,7 +132,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser to view the 
 
 ---
 
-## 🧪 Verification & Judge Testing Scenarios
+##  Verification & Judge Testing Scenarios
 
 | Scenario | Input Site Log | Matched WBS Code | Confidence | System Action |
 | --- | --- | --- | --- | --- |
@@ -142,7 +142,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser to view the 
 
 ---
 
-## 👥 Team & Institution
+## -> Team & Institution
 
 * **Team Name**: Avyakthra (Team ID: 171927)
 * **Hackathon**: Smart India Hackathon (SIH) 2026 
@@ -152,5 +152,5 @@ Open [http://localhost:5173](http://localhost:5173) in your browser to view the 
 
 **Developed by Team Avyakthra for Smart India Hackathon 2026**
 
-[🌐 Live Demo](https://plan2field-ai.vercel.app) • [🐙 GitHub Repository](https://github.com/adithyadiwanad-sudo/plan2field-ai)
+[ Live Demo](https://plan2field-ai.vercel.app) • [ GitHub Repository](https://github.com/adithyadiwanad-sudo/plan2field-ai)
 
