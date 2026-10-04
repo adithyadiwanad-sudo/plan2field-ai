@@ -4,7 +4,7 @@
 #  Plan2Field AI
 ### Intelligent Data Capture & Schedule-Linking Layer for Real-Time Infrastructure Progress Tracking
 
-[![PS ID SIH26122](https://img.shields.io/badge/PS_ID-SIH26122-blue?style=for-the-badge)](https://plan2field-ai.vercel.app)
+[![PS ID SIH26122](https://img.shields.io/badge/PS_ID-SIH26122-blue?style=for-the-badge)]([https://plan2field-ai.vercel.app](https://www.sihbuddy.in/ps/SIH26122))
 
 [![Nodal Org Oil India](https://img.shields.io/badge/Nodal_Org-Oil_India_Limited-008080?style=for-the-badge)](https://plan2field-ai.vercel.app)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-plan2field--ai.vercel.app-success?style=for-the-badge&logo=vercel)](https://plan2field-ai.vercel.app)
