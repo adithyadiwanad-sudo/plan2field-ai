@@ -1,8 +1,4 @@
-Here is the updated, judge-optimized `README.md` content tailored for **Plan2Field AI**.
 
-You can copy the raw Markdown block below and paste it directly into your local `README.md` file (or let your AI editor replace the file contents).
-
-```markdown
 <div align="center">
 
 # 🏗️ Plan2Field AI
@@ -159,3 +155,4 @@ Open [http://localhost:5173](http://localhost:5173) in your browser to view the 
 **Developed with ❤️ by Team Avyakthra for Smart India Hackathon 2026**
 
 [🌐 Live Demo](https://plan2field-ai.vercel.app) • [🐙 GitHub Repository](https://github.com/adithyadiwanad-sudo/plan2field-ai)
+
