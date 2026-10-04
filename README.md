@@ -25,7 +25,7 @@ Infrastructure megaprojects lose millions due to **delayed progress tracking** a
 
 **Plan2Field AI** serves as an intelligent data capture and schedule-linking layer that ingests unstructured site updates (voice, text, photo notes), normalizes site jargon into formal WBS activity codes via 1536-dimensional semantic vector matching (`pgvector`), and stages validated updates into Primavera P6 without baseline corruption.
 
-```
+
 ```
    [ Unstructured Site Log ] 
 (Voice / Text / Jargon / GPS)
