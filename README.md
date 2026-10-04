@@ -5,6 +5,7 @@
 ### Intelligent Data Capture & Schedule-Linking Layer for Real-Time Infrastructure Progress Tracking
 
 [![PS ID SIH26122](https://img.shields.io/badge/PS_ID-SIH26122-blue?style=for-the-badge)](https://plan2field-ai.vercel.app)
+
 [![Nodal Org Oil India](https://img.shields.io/badge/Nodal_Org-Oil_India_Limited-008080?style=for-the-badge)](https://plan2field-ai.vercel.app)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-plan2field--ai.vercel.app-success?style=for-the-badge&logo=vercel)](https://plan2field-ai.vercel.app)
 
@@ -144,7 +145,6 @@ Open [http://localhost:5173](http://localhost:5173) in your browser to view the 
 ## 👥 Team & Institution
 
 * **Team Name**: Avyakthra (Team ID: 171927)
-* **Institution**: Don Bosco Institute of Technology (DBIT), Bengaluru
 * **Hackathon**: Smart India Hackathon (SIH) 2026 
 * **Problem Statement ID**: SIH26122 (Oil India Limited)
 
