@@ -13,7 +13,7 @@
   <b>Bridging the gap between site execution and Primavera P6 enterprise schedules using voice AI, pgvector semantic search, and human-in-the-loop verification.</b>
 </p>
 
-[🌐 Live Prototype](https://plan2field-ai.vercel.app) • [📄 GitHub Repository](https://github.com/adithyadiwanad-sudo/plan2field-ai) • [⚡ Team Avyakthra](#-team--institution)
+[ Live Prototype](https://plan2field-ai.vercel.app) • [ GitHub Repository](https://github.com/adithyadiwanad-sudo/plan2field-ai) • [ Team Avyakthra](#-team--institution)
 
 </div>
 
@@ -25,9 +25,7 @@ Infrastructure megaprojects lose millions due to **delayed progress tracking** a
 
 **Plan2Field AI** serves as an intelligent data capture and schedule-linking layer that ingests unstructured site updates (voice, text, photo notes), normalizes site jargon into formal WBS activity codes via 1536-dimensional semantic vector matching (`pgvector`), and stages validated updates into Primavera P6 without baseline corruption.
 
-
 ```
-
 ```
    [ Unstructured Site Log ] 
 (Voice / Text / Jargon / GPS)
@@ -142,7 +140,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser to view the 
 
 ---
 
-## -> Team & Institution
+##  Team & Institution
 
 * **Team Name**: Avyakthra (Team ID: 171927)
 * **Hackathon**: Smart India Hackathon (SIH) 2026 
